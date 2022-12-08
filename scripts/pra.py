@@ -2,6 +2,7 @@
 
 import rospy
 import moveit_commander
+from geometry_msgs.msg import Point
 
 
 def main():
@@ -12,7 +13,7 @@ def main():
     print("Robot Group names:  ", end="")        # crane_x7 の Group 全ての名前
     print(crane.get_group_names())
 
-    print("Robot current state:")      # crane_x7 の現在の状態
+    print("Robot current state:")                # crane_x7 の現在の状態
     print(crane.get_current_state())
 
     arm = moveit_commander.MoveGroupCommander("arm")
@@ -23,8 +24,16 @@ def main():
 
     arm_init_pose = arm.get_current_pose().pose  # arm の初期姿勢
     print("")
-    print("Arm initial pose:  ", end="")
+    print("Arm initial pose:")
     print(arm_init_pose)
+
+    arm.set_position_target([ 0.1, 0.0, 0.1 ])
+    arm.go()
+
+    arm_current_pose = arm.get_current_pose().pose  # arm の現在姿勢$
+    print("")
+    print("Arm current pose:")
+    print(arm_current_pose)
 
     print("home")
     arm.set_named_target("home")
