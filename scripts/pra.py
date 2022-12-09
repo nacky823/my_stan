@@ -27,6 +27,10 @@ def main():
     print("Arm initial pose:")
     print(arm_init_pose)
 
+    print("home")
+    arm.set_named_target("home")
+    arm.go()
+
     arm.set_position_target([ 0.1, 0.0, 0.1 ])
     arm.go()
 
