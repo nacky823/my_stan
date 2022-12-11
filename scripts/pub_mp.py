@@ -171,12 +171,12 @@ def main():
         #while not rospy.is_shutdown():
 
         # トピックを送信
-        #msg_str = "Publishing {}".format(rospy.get_time())
+        msg_str = "Publishing {}".format(rospy.get_time())
         msg_crd = coord_mouth
-        #pub_str.publish(msg_str)
+        pub_str.publish(msg_str)
         pub_crd.publish(msg_crd)
 
-        #rospy.loginfo("Message '{}' published".format(msg_str))
+        rospy.loginfo("Message '{}' published".format(msg_str))
         rospy.loginfo(coord_mouth)
 
         # 1 秒スリープする
