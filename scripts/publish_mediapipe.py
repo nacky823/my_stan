@@ -11,7 +11,9 @@ from collections import deque
 from std_msgs.msg import String
 from geometry_msgs.msg import Point
 
-coord_mouth = Point()
+current_point = Point() # 口の中心の座標
+target_point = Point()  # カメラ画像中心の座標
+target_point.z = 0      # camera target z
 
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
@@ -58,9 +60,10 @@ def get_args():
 
 def main():
 
-    rospy.init_node("pub_mp")   # node 初期化
-    pub_str = rospy.Publisher("mediapipe_str", String, queue_size=10)    # publisher 作成
-    pub_crd = rospy.Publisher("mediapipe_crd", Point, queue_size=10)    # publisher 作成
+    rospy.init_node("publish_mediapipe")   # node 初期化
+    #pub_str = rospy.Publisher("mediapipe_string", String, queue_size=10)    # publisher 作成
+    pub_curr = rospy.Publisher("mediapipe_current", Point, queue_size=10)    # publisher 作成
+    pub_targ = rospy.Publisher("mediapipe_target", Point, queue_size=10)    # publisher 作成
 
 
     # 引数解析 #################################################################
@@ -88,11 +91,18 @@ def main():
     print(cap_device)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
     print('WIDTH : x_max = ', end='')
-    print(cap.get(cv.CAP_PROP_FRAME_WIDTH))
+    x_max = cap.get(cv.CAP_PROP_FRAME_WIDTH)
+    print(x_max)
+    #print(cap.get(cv.CAP_PROP_FRAME_WIDTH))
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
     print('HEIGHT : y_max = ', end='')
-    print(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
+    y_max = cap.get(cv.CAP_PROP_FRAME_HEIGHT)
+    print(y_max)
+    #print(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
     # cap.set() は実質反映されていない。
+    
+    target_point.x = (x_max/2)
+    target_point.y = (y_max/2)
 
     # モデルロード #############################################################
     mp_face_mesh = mp.solutions.face_mesh
@@ -171,13 +181,14 @@ def main():
         #while not rospy.is_shutdown():
 
         # トピックを送信
-        msg_str = "Publishing {}".format(rospy.get_time())
-        msg_crd = coord_mouth
-        pub_str.publish(msg_str)
-        pub_crd.publish(msg_crd)
+        #msg_str = "Publishing {}".format(rospy.get_time())
+        #pub_str.publish(msg_str)
+        pub_targ.publish(target_point)
+        pub_curr.publish(current_point)
 
-        rospy.loginfo("Message '{}' published".format(msg_str))
-        rospy.loginfo(coord_mouth)
+        #rospy.loginfo("Message '{}' published".format(msg_str))
+        rospy.loginfo(target_point)
+        rospy.loginfo(current_point)
 
         # 1 秒スリープする
         #rate.sleep()
@@ -356,9 +367,9 @@ def draw_landmarks(image, landmarks):
         #print(target)
 
         #coord_mouth = Point()
-        coord_mouth.x = target[0]
-        coord_mouth.y = target[1]
-        coord_mouth.z = 0
+        current_point.x = target[0]
+        current_point.y = target[1]
+        current_point.z = 0
 
         cv.circle(image, target, 3, (255, 0, 255), 2) # 口中心の描写
 
