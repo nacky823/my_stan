@@ -1,0 +1,4 @@
+<launch>
+    <node name="pub_mp" pkg="my_stan" type="pub_mp.py" output="screen" />
+    <node name="sub_mp" pkg="my_stan" type="sub_mp.py" output="screen" />
+</launch>
