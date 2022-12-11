@@ -3,6 +3,7 @@
 import copy
 import argparse
 
+import rospy
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
@@ -52,6 +53,23 @@ def get_args():
 
 
 def main():
+
+    rospy.init_node("pub_mp")   # node 初期化
+    pub = rospy.Publisher("medi", String, queue_size=10)    # publisher 作成
+
+    # 0.1 秒ごとにトピックを送信
+    rate = rospy.Rate(10)
+    while not rospy.is_shutdown():
+
+        # トピックを送信
+        msg = "medi_test {}".format(rospy.get_time())
+        pub.publish(msg)
+
+        rospy.loginfo("Message '{}' published".format(msg))
+
+        # 0.1 秒スリープする
+        rate.sleep()
+
     # 引数解析 #################################################################
     args = get_args()
 
