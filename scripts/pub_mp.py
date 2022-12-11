@@ -177,7 +177,7 @@ def main():
         pub_crd.publish(msg_crd)
 
         #rospy.loginfo("Message '{}' published".format(msg_str))
-        #rospy.loginfo( coord_mouth )
+        rospy.loginfo(coord_mouth)
 
         # 1 秒スリープする
         #rate.sleep()
