@@ -112,7 +112,10 @@ def main():
     print('各次元の長さ : (y, x, ?) =', image.shape)
     print('全要素数 :', image.size)
 
-    while True:
+    rate = rospy.Rate(5)
+
+    while not rospy.is_shutdown():
+    #while True:
         #print(cvFpsCalc.get()) #whileないだけのようだ。↓　
         display_fps = cvFpsCalc.get()
         #print(display_fps)
@@ -154,9 +157,9 @@ def main():
 
 
         # キー処理(ESC：終了) #################################################
-        key = cv.waitKey(1)
-        if key == 27:  # ESC
-            break
+        #key = cv.waitKey(1)
+        #if key == 27:  # ESC
+        #    break
 
         # 画面反映 #############################################################
         cv.imshow('MediaPipe Face Mesh Demo', debug_image)
@@ -164,20 +167,20 @@ def main():
 
 
         # 1 秒ごとにトピックを送信
-        rate = rospy.Rate(1)
-        while not rospy.is_shutdown():
+        #rate = rospy.Rate(1)
+        #while not rospy.is_shutdown():
 
-            # トピックを送信
-            msg_str = "Publishing {}".format(rospy.get_time())
-            msg_crd = coord_mouth
-            pub_str.publish(msg_str)
-            pub_crd.publish(msg_crd)
+        # トピックを送信
+        msg_str = "Publishing {}".format(rospy.get_time())
+        msg_crd = coord_mouth
+        pub_str.publish(msg_str)
+        pub_crd.publish(msg_crd)
 
-            rospy.loginfo("Message '{}' published".format(msg_str))
-            rospy.loginfo( coord_mouth )
+        rospy.loginfo("Message '{}' published".format(msg_str))
+        rospy.loginfo( coord_mouth )
 
-            # 1 秒スリープする
-            rate.sleep()
+        # 1 秒スリープする
+        rate.sleep()
 
 
 
