@@ -1,8 +1,0 @@
-[ WARN:0@0.199] global /io/opencv/modules/videoio/src/cap_v4l.cpp (902) open VIDEOIO(V4L2:/dev/video1): can't open camera by index
-INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
-Traceback (most recent call last):
-  File "./sample_face.py", line 324, in <module>
-    main()
-  File "./sample_face.py", line 83, in main
-    print('次元数 :', image.ndim)
-AttributeError: 'NoneType' object has no attribute 'ndim'
