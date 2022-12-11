@@ -9,6 +9,7 @@ import numpy as np
 import mediapipe as mp
 from collections import deque
 from std_msgs.msg import String
+from geometry_msgs.msg import Point
 
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
@@ -56,20 +57,9 @@ def get_args():
 def main():
 
     rospy.init_node("pub_mp")   # node 初期化
-    pub = rospy.Publisher("medi", String, queue_size=10)    # publisher 作成
+    pub_str = rospy.Publisher("mediapipe_str", String, queue_size=10)    # publisher 作成
+    pub_crd = rospy.Publisher("mediapipe_crd", Point, queue_size=10)    # publisher 作成
 
-    # 0.1 秒ごとにトピックを送信
-    rate = rospy.Rate(10)
-    while not rospy.is_shutdown():
-
-        # トピックを送信
-        msg = "medi_test {}".format(rospy.get_time())
-        pub.publish(msg)
-
-        rospy.loginfo("Message '{}' published".format(msg))
-
-        # 0.1 秒スリープする
-        rate.sleep()
 
     # 引数解析 #################################################################
     args = get_args()
@@ -159,6 +149,24 @@ def main():
 
         cv.putText(debug_image, "FPS:" + str(display_fps), (10, 30),
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv.LINE_AA)
+
+
+        # 0.1 秒ごとにトピックを送信
+        rate = rospy.Rate(10)
+        while not rospy.is_shutdown():
+
+            # トピックを送信
+            msg_str = "Publishing {}".format(rospy.get_time())
+            msg_crd = coord_mouth
+            pub_str.publish(msg_str)
+            pub_crd.publish(msg_crd)
+
+            rospy.loginfo("Message '{}' published".format(msg_str))
+            rospy.loginfo( coord_mouth )
+
+            # 0.1 秒スリープする
+            rate.sleep()
+
 
         # キー処理(ESC：終了) #################################################
         key = cv.waitKey(1)
@@ -338,6 +346,11 @@ def draw_landmarks(image, landmarks):
         summ = [ a + b for (a, b) in zip(landmark_point[13], diff) ]
         target = [ int(i) for i in summ ]   # 口中心の座標所得
         #print(target)
+
+        coord_mouth = Point()
+        coord_mouth.x = target[0]
+        coord_mouth.y = target[1]
+        coord_mouth.z = 0
 
         cv.circle(image, target, 3, (255, 0, 255), 2) # 口中心の描写
 
