@@ -2,15 +2,16 @@
 
 import rospy
 from std_msgs.msg import String
+from geometry_msgs.msg import Point
 
 def callback(msg):
-    rospy.loginfo("sub_test_Message '{}' recieved".format(msg.data))
+    rospy.loginfo("Subscribing '{}' recieved".format(msg.data))
 
 def subscriber():
 
     rospy.init_node("sub_mp")   # ノードを初期化
 
-    rospy.Subscriber("medi", String, callback)     # 受信者を作成
+    rospy.Subscriber("mediapipe_str", String, callback)     # 受信者を作成
     
     rospy.spin()    # ノードが終了するまで待機
 

@@ -11,6 +11,8 @@ from collections import deque
 from std_msgs.msg import String
 from geometry_msgs.msg import Point
 
+coord_mouth = Point()
+
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
         self._start_tick = cv.getTickCount()
@@ -151,8 +153,18 @@ def main():
                    cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv.LINE_AA)
 
 
-        # 0.1 秒ごとにトピックを送信
-        rate = rospy.Rate(10)
+        # キー処理(ESC：終了) #################################################
+        key = cv.waitKey(1)
+        if key == 27:  # ESC
+            break
+
+        # 画面反映 #############################################################
+        cv.imshow('MediaPipe Face Mesh Demo', debug_image)
+
+
+
+        # 1 秒ごとにトピックを送信
+        rate = rospy.Rate(1)
         while not rospy.is_shutdown():
 
             # トピックを送信
@@ -164,17 +176,10 @@ def main():
             rospy.loginfo("Message '{}' published".format(msg_str))
             rospy.loginfo( coord_mouth )
 
-            # 0.1 秒スリープする
+            # 1 秒スリープする
             rate.sleep()
 
 
-        # キー処理(ESC：終了) #################################################
-        key = cv.waitKey(1)
-        if key == 27:  # ESC
-            break
-
-        # 画面反映 #############################################################
-        cv.imshow('MediaPipe Face Mesh Demo', debug_image)
 
     cap.release()
     cv.destroyAllWindows()
@@ -347,7 +352,7 @@ def draw_landmarks(image, landmarks):
         target = [ int(i) for i in summ ]   # 口中心の座標所得
         #print(target)
 
-        coord_mouth = Point()
+        #coord_mouth = Point()
         coord_mouth.x = target[0]
         coord_mouth.y = target[1]
         coord_mouth.z = 0
