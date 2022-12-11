@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 import copy
 import argparse
@@ -8,6 +8,7 @@ import cv2 as cv
 import numpy as np
 import mediapipe as mp
 from collections import deque
+from std_msgs.msg import String
 
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
