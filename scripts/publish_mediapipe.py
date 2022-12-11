@@ -11,7 +11,7 @@ from collections import deque
 from std_msgs.msg import String
 from geometry_msgs.msg import Point
 
-current_point = Point() # 口の中心の座標
+diff_point = Point() # 偏差
 target_point = Point()  # カメラ画像中心の座標
 target_point.z = 0      # camera target z
 
@@ -62,8 +62,7 @@ def main():
 
     rospy.init_node("publish_mediapipe")   # node 初期化
     #pub_str = rospy.Publisher("mediapipe_string", String, queue_size=10)    # publisher 作成
-    pub_curr = rospy.Publisher("mediapipe_current", Point, queue_size=10)    # publisher 作成
-    pub_targ = rospy.Publisher("mediapipe_target", Point, queue_size=10)    # publisher 作成
+    pub_diff = rospy.Publisher("mediapipe_difference", Point, queue_size=10)    # publisher 作成
 
 
     # 引数解析 #################################################################
@@ -183,12 +182,10 @@ def main():
         # トピックを送信
         #msg_str = "Publishing {}".format(rospy.get_time())
         #pub_str.publish(msg_str)
-        pub_targ.publish(target_point)
-        pub_curr.publish(current_point)
+        pub_diff.publish(diff_point)
 
         #rospy.loginfo("Message '{}' published".format(msg_str))
-        rospy.loginfo(target_point)
-        rospy.loginfo(current_point)
+        rospy.loginfo(diff_point)
 
         # 1 秒スリープする
         #rate.sleep()
@@ -366,10 +363,15 @@ def draw_landmarks(image, landmarks):
         target = [ int(i) for i in summ ]   # 口中心の座標所得
         #print(target)
 
-        #coord_mouth = Point()
+        current_point = Point() # 口中心の座標
         current_point.x = target[0]
         current_point.y = target[1]
         current_point.z = 0
+
+        diff_point.x = ( target_point.x - current_point.x )
+        diff_point.y = ( target_point.y - current_point.y )
+        diff_point.z = ( target_point.z - current_point.z )
+
 
         cv.circle(image, target, 3, (255, 0, 255), 2) # 口中心の描写
 
