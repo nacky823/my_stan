@@ -28,6 +28,24 @@ def main():
     print("")
     print("Arm current pose:")
     print(arm_current_pose)
+    print("")
+    current_joint_deg = gripper.get_current_joint_values()
+    print("Joint current deg:")
+    print(current_joint_deg)
+    current_arm_deg = arm.get_current_joint_values()
+    print("Arm current deg:")
+    print(current_arm_deg)
+    set_arm_deg = [
+            0.0019240830344822157,
+            0.3816045993673516,
+            0.0009249622074509745,
+            -2.2298474391216097,
+            0.05583576835324777,
+            0.2814626521875107,
+            -0.00464467406541047]
+    arm.set_joint_value_target(set_arm_deg)
+    arm.go()
+
 
     rospy.Subscriber("mediapipe_difference", Point, callback)
 
