@@ -123,8 +123,8 @@ def main():
 
     #rate = rospy.Rate(10)
 
-    #while not rospy.is_shutdown():
-    while True:
+    while not rospy.is_shutdown():
+    #while True:
         #print(cvFpsCalc.get()) #whileないだけのようだ。↓　
         display_fps = cvFpsCalc.get()
         #print(display_fps)
@@ -189,7 +189,7 @@ def main():
 
         # 1 秒スリープする
         #rate.sleep()
-
+        rospy.sleep(0.05)
 
 
     cap.release()
