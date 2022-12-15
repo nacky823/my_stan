@@ -25,6 +25,8 @@ def main():
     gripper.go()
     # キーが入力されるまで待つ
     input("Input Key for Gripper Close ... ")
+    # キーが入力されたらグリッパーを閉じる
+    # コードを終了する
 
 if __name__ == "__main__":
     main()
