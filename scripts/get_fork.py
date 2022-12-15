@@ -2,6 +2,13 @@
 # coding: utf-8
 # get_fork.py
 
+# SPDX-FileCopyrightText: 2022 YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
+# SPDX-License-Identifier: 
+
+# グリッパーを開く
+# キーが入力されるまで開いたまま
+# キーが入力されたらグリッパーを閉じる
+
 import rospy
 import math
 import sys
