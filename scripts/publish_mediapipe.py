@@ -189,7 +189,7 @@ def main():
 
         # 1 秒スリープする
         #rate.sleep()
-        rospy.sleep(0.05)
+        rospy.sleep(0.02) # 0.05
 
 
     cap.release()

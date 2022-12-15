@@ -3,6 +3,9 @@
 import rospy
 import moveit_commander
 from geometry_msgs.msg import Point
+from tf.transformations import quaternion_from_euler
+
+
 
 def main():
 
@@ -45,6 +48,37 @@ def main():
             -0.00464467406541047]
     arm.set_joint_value_target(set_arm_deg)
     arm.go()
+    arm_current_pose = arm.get_current_pose().pose  # arm の現在姿勢$
+    print("")
+    print("Arm current pose:")
+    print(arm_current_pose)
+    print(arm_current_pose.position.x)
+    arm_current_pose = arm.get_current_pose().pose  # arm の現在姿勢$
+    arm_current_pose.position.x = arm_current_pose.position.x + 2
+    arm_current_pose.position.y = arm_current_pose.position.y + 2
+    arm_current_pose.position.z = arm_current_pose.position.z + 0
+    print(arm_current_pose)
+    arm_change_pose = [
+            arm_current_pose.position.x,
+            arm_current_pose.position.y,
+            arm_current_pose.position.z,
+            arm_current_pose.orientation.x,
+            arm_current_pose.orientation.y,
+            arm_current_pose.orientation.z,
+            arm_current_pose.orientation.w ]
+    print(arm_change_pose)
+    arm_current_pose.position.x = 0.0
+    arm_current_pose.position.y = 0.0
+    arm_current_pose.position.z = 0.8
+    q = quaternion_from_euler( 0.0, 0.0, 0.0 )
+    arm_current_pose.orientation.x = q[0]
+    arm_current_pose.orientation.y = q[1]
+    arm_current_pose.orientation.z = q[2]
+    arm_current_pose.orientation.w = q[3]
+
+
+    arm.set_pose_target( arm_current_pose ) # 目標ポーズ設定
+    arm.go()
 
 
     rospy.Subscriber("mediapipe_difference", Point, callback)
@@ -54,7 +88,7 @@ def main():
 
 def callback(msg):
 
-    X_GAIN = 0.1
+    X_GAIN = 1
     Y_GAIN = 0.1
     Z_GAIN = 0.1
 
@@ -70,6 +104,14 @@ def callback(msg):
     rospy.loginfo("recieved %f", float(fix_y))
     fix_z = sub_diff.z * Z_GAIN
     rospy.loginfo("recieved %f", float(fix_z))
+
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm_current_pose = arm.get_current_pose().pose  # arm の現在姿勢$
+    arm_current_pose.position.x = arm_current_pose.position.x + fix_x
+    arm_current_pose.position.y = arm_current_pose.position.y + fix_y
+    arm_current_pose.position.z = arm_current_pose.position.z + fix_z
+    arm.set_pose_target( arm_current_pose ) # 目標ポーズ設定
+    arm.go()
 
 
 
