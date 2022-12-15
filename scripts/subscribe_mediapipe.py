@@ -87,12 +87,38 @@ def main():
 
     arm.set_pose_target( test ) # 目標ポーズ設定
     arm.go()
+    print("home")
+    arm.set_named_target("home")
+    arm.go()
     #get_test = arm.shift_pose_target() 
+    get_rpy = arm.get_current_rpy() 
+    print(get_rpy)
+    get_xyz = arm.get_current_pose().pose
+    print(get_xyz)
+    print("okokokokokok")
+    newx = get_xyz.position.x + 0.1
+    print(newx)
+    print("okokkokookkoo")
+
+    new_rpy = get_rpy
+    new_arr = [
+            newx,
+            get_xyz.position.y + 0.1,
+            get_xyz.position.z,
+            get_rpy[0],
+            get_rpy[1],
+            get_rpy[2] ]
+            
+    print(new_arr)
+    arm.set_pose_target( new_arr )
+    arm.go()
+    print("new_set")
     get_test = arm.get_current_rpy() 
     print(get_test)
     get_xyz = arm.get_current_pose()
     print(get_xyz)
-    print("okokokokokok")
+    print("uiuiuuuuiui")
+    
 
 
     rospy.Subscriber("mediapipe_difference", Point, callback)
