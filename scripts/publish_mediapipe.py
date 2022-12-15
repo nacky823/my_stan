@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+
 import copy
 import argparse
-
 import rospy
 import cv2 as cv
 import numpy as np
 import mediapipe as mp
+import statistics
 from collections import deque
 from std_msgs.msg import String
 from geometry_msgs.msg import Point
@@ -14,6 +15,20 @@ from geometry_msgs.msg import Point
 diff_point = Point() # 偏差
 target_point = Point()  # カメラ画像中心の座標
 target_point.z = 0      # camera target z
+
+DEVICE_NUM = 0
+
+# 複数の座標の重心を取得するインデックス    Yazawa
+# 0 と 1 を取得するので z 座標が含まれていても問題なし
+def center(points):
+    mid_x = statistics.mean(points.T[0])
+    mid_y = statistics.mean(points.T[1])
+    return np.array([mid_x, mid_y])
+
+# 二点間の距離を図るノルム２    Yazawa
+# こっちは x, y の二次元で与えないとエラー出そう
+def norm(a, b):
+        return np.linalg.norm(np.subtract(a, b), ord = 2)
 
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
@@ -33,11 +48,12 @@ class CvFpsCalc(object):
 
         return fps_rounded
 
-
 def get_args():
     parser = argparse.ArgumentParser()
 
-    parser.add_argument("--device", type=int, default=0)    # Real sens video6
+    # ウェブカムか PC 内臓のやつかを選択できるようにデバイスを変数化    yazawa
+    global DEVICE_NUM
+    parser.add_argument("--device", type=int, default = DEVICE_NUM)    # Real sens video6
     parser.add_argument("--width", help='cap width', type=int, default=960)
     parser.add_argument("--height", help='cap height', type=int, default=540)
 
@@ -117,14 +133,17 @@ def main():
     #print(cvFpsCalc.get())
 
     ret, image = cap.read()
-    print('次元数 :', image.ndim)
     print('各次元の長さ : (y, x, ?) =', image.shape)
     print('全要素数 :', image.size)
 
     #rate = rospy.Rate(10)
 
     while not rospy.is_shutdown():
+<<<<<<< HEAD
     #while True:
+=======
+    # while True:
+>>>>>>> cae061d4862b8b2ab5b7f8302de3ed7a9017103d
         #print(cvFpsCalc.get()) #whileないだけのようだ。↓　
         display_fps = cvFpsCalc.get()
         #print(display_fps)
@@ -182,19 +201,25 @@ def main():
         # トピックを送信
         #msg_str = "Publishing {}".format(rospy.get_time())
         #pub_str.publish(msg_str)
+        # これ無いとだめじゃね？        yazawa
+        global diff_point
         pub_diff.publish(diff_point)
 
         #rospy.loginfo("Message '{}' published".format(msg_str))
         rospy.loginfo(diff_point)
 
         # 1 秒スリープする
+<<<<<<< HEAD
         #rate.sleep()
         rospy.sleep(0.02) # 0.05
+=======
+        rate.sleep()
+>>>>>>> cae061d4862b8b2ab5b7f8302de3ed7a9017103d
 
+        rospy.sleep(0.02)
 
     cap.release()
     cv.destroyAllWindows()
-
 
 def calc_bounding_rect(image, landmarks):
     image_width, image_height = image.shape[1], image.shape[0]
@@ -208,6 +233,7 @@ def calc_bounding_rect(image, landmarks):
         #print('/////////////////////////////////////////////////////////////////////////??')
         landmark_x = min(int(landmark.x * image_width), image_width - 1)
         landmark_y = min(int(landmark.y * image_height), image_height - 1)
+
 
         landmark_point = [np.array((landmark_x, landmark_y))]
 
@@ -363,15 +389,31 @@ def draw_landmarks(image, landmarks):
         target = [ int(i) for i in summ ]   # 口中心の座標所得
         #print(target)
 
+        ### 深さの計算 Yazawa ###
+        # 両目の特徴点の座標を取得
+        left_eye_points = np.array([landmark_point[133], landmark_point[246]])
+        right_eye_points = np.array([landmark_point[362], landmark_point[466]])
+        # 両目の中心点を取得
+        left_eye = center(left_eye_points)
+        right_eye = center(right_eye_points)
+        # 両目の距離を計算
+        px = norm(left_eye, right_eye)
+        # 三角法で距離を計算    単位 [m]
+        dist1 = 50     # px
+        diff1 = 0.94      # m
+        dist2 = 150      # px
+        diff2 = 0.27     # m
+        face_depth = (px - dist1) * (diff1 - diff2) / (dist1 - dist2) + diff1
+
         current_point = Point() # 口中心の座標
         current_point.x = target[0]
         current_point.y = target[1]
-        current_point.z = 0
+        current_point.z = face_depth # 深さ情報の追加 Yazawa
 
-        diff_point.x = ( target_point.x - current_point.x )
+        # これ無いとだめじゃね？    Yazawa
+        global diff_point
         diff_point.y = ( target_point.y - current_point.y )
         diff_point.z = ( target_point.z - current_point.z )
-
 
         cv.circle(image, target, 3, (255, 0, 255), 2) # 口中心の描写
 
@@ -384,6 +426,9 @@ def draw_landmarks(image, landmarks):
 
         #cv.putText(image, "z:" + str(round(landmark_z, 3)), (landmark_x - 10, landmark_y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
 
+    # endif len(landmark_point)
+
+
     return image
 
 
@@ -395,6 +440,6 @@ def draw_bounding_rect(use_brect, image, brect):
 
     return image
 
-
 if __name__ == '__main__':
+    print(diff_point)
     main()
