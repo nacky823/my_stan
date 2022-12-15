@@ -76,9 +76,23 @@ def main():
     arm_current_pose.orientation.z = q[2]
     arm_current_pose.orientation.w = q[3]
 
+    test = [
+            0,
+            0,
+            0.3,
+            1.6,
+            -0.03,
+            -1.6 ]
 
-    arm.set_pose_target( arm_current_pose ) # 目標ポーズ設定
+
+    arm.set_pose_target( test ) # 目標ポーズ設定
     arm.go()
+    #get_test = arm.shift_pose_target() 
+    get_test = arm.get_current_rpy() 
+    print(get_test)
+    get_xyz = arm.get_current_pose()
+    print(get_xyz)
+    print("okokokokokok")
 
 
     rospy.Subscriber("mediapipe_difference", Point, callback)
