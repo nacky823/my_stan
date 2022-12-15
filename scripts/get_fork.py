@@ -1,15 +1,18 @@
 #!/usr/bin/env python3
 # coding: utf-8
+# get_fork.py
 
 import rospy
 import math
+import sys
 
 def deg2rad(deg):
     return math.radians(deg)
 
 def main():
+    # 閉まる角度を指定
     GRIPPER_CLOSE = [0, 0]
-    # 開くのは 度数法 93 度が限界
+    # 開く角度を指定 度数法 93 度が限界
     GRIPPER_OPEN = [deg2rad(93), deg2rad(93)]
     # ノードを初期化する
     rospy.init_node('get_fork')
@@ -26,8 +29,11 @@ def main():
     # キーが入力されるまで待つ
     input("Input Key for Gripper Close ... ")
     # キーが入力されたらグリッパーを閉じる
+    set_joint_value_target(GRIPPER_CLOSE)
     # コードを終了する
+    return 0
 
 if __name__ == "__main__":
-    main()
+    res = main()
+    sys.exit(res)
 
