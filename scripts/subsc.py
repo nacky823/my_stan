@@ -36,7 +36,7 @@ def main():
 
     new_rpy = get_rpy
     new_arr = [
-            get_xyz.position.x + 0,
+            get_xyz.position.x + 0.0,
             get_xyz.position.y + 0.0,
             get_xyz.position.z + 0.0,
             get_rpy[0],
@@ -85,7 +85,7 @@ def callback(msg):
 
     arm_current_pose.pose.position.x = arm_current_pose.pose.position.x + 0.00
     arm_current_pose.pose.position.y = arm_current_pose.pose.position.y + 0.00
-    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z + 0.00
+    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z + 0.001
     print("arm_current_pose  :  ", end="")
     print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
 
@@ -105,6 +105,10 @@ def callback(msg):
 
     arm.set_pose_target( target )
     arm.go()
+    print("arm_current_pose  :  ", end="")
+    print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
+    print("arm_current_rpy  :  ", end="")
+    print(arm_current_rpy)
 
     print("============================================================")
 
