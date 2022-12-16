@@ -35,8 +35,8 @@ def main():
     new_rpy = get_rpy
     new_arr = [
             get_xyz.position.x + 0.1,
-            get_xyz.position.y + 0.1,
-            get_xyz.position.z,
+            get_xyz.position.y + 0,
+            get_xyz.position.z + 0,
             get_rpy[0],
             get_rpy[1],
             get_rpy[2] ]
@@ -58,15 +58,15 @@ def main():
 
 def callback(msg):
 
-    X_GAIN = 0.001
-    Y_GAIN = 0.001
-    Z_GAIN = 0.001
+    X_GAIN = 0.0001
+    Y_GAIN = 0.0001
+    Z_GAIN = 0.0001
 
+    rospy.loginfo("SSSS==================================================================")
     rospy.loginfo(msg)
     sub_diff = Point()
     sub_diff = msg
     rospy.loginfo(sub_diff)
-    rospy.loginfo("===================================================================")
 
     fix_x = sub_diff.x * X_GAIN
     rospy.loginfo("recieved %f", float(fix_x))
@@ -74,6 +74,7 @@ def callback(msg):
     rospy.loginfo("recieved %f", float(fix_y))
     fix_z = sub_diff.z * Z_GAIN
     rospy.loginfo("recieved %f", float(fix_z))
+    rospy.loginfo("EEEE==================================================================")
 
     arm = moveit_commander.MoveGroupCommander("arm")
     arm_current_pose = arm.get_current_pose().pose  # arm の現在姿勢$
@@ -96,23 +97,6 @@ def callback(msg):
     rospy.loginfo(target)
     arm.set_pose_target( target )
     arm.go()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 if __name__ == "__main__":
