@@ -76,59 +76,35 @@ def callback(msg):
     fix_y = sub_diff.x * X_GAIN
     fix_z = sub_diff.y * Y_GAIN
 
-    arm = moveit_commander.MoveGroupCommander("arm")
-    arm_current_pose = arm.get_current_pose().pose
+    arm = moveit_commander.MoveGroupCommander("arm")            # arm instantiation
+    gripper = moveit_commander.MoveGroupCommander("gripper")    # gripper instantiation
+    arm_current_pose = arm.get_current_pose()
     print("arm_current_pose  :  ", end="")
-    print(arm_current_pose.position.x, " , ",  arm_current_pose.position.y, " , " , arm_current_pose.position.z)
-    #arm_current_pose.position.x = arm_current_pose.position.x + fix_x
-    #arm_current_pose.position.y = arm_current_pose.position.y + fix_y
-    #arm_current_pose.position.z = arm_current_pose.position.z + fix_z
-    #arm.set_pose_target( arm_current_pose ) # 目標ポーズ設定
-    #arm.go()
+    print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
+    #print(arm_current_pose)
 
+    arm_current_pose.pose.position.x = arm_current_pose.pose.position.x + 0.00
+    arm_current_pose.pose.position.y = arm_current_pose.pose.position.y + 0.00
+    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z + 0.00
+    print("arm_current_pose  :  ", end="")
+    print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
 
-    target_pose = Pose()
-    target_pose.position.x = arm_current_pose.position.x + 0.00
-    target_pose.position.y = arm_current_pose.position.y + 0.00
-    target_pose.position.z = arm_current_pose.position.z + 0.00
-    print("target_pose       :  ", end="")
-    print(target_pose.position.x, " , ", target_pose.position.y, " , " ,target_pose.position.z)
-    #target_pose.position.x = 0.0
-    #target_pose.position.y = 0.0
-    #target_pose.position.z = test
-
-    #q = quaternion_from_euler(0.0,0.0,0.0)
-
-    target_pose.orientation.x = arm_current_pose.orientation.x
-    target_pose.orientation.y = arm_current_pose.orientation.y
-    target_pose.orientation.z = arm_current_pose.orientation.z
-    target_pose.orientation.w = arm_current_pose.orientation.w
-    
-    #print(arm_current_pose.position.z)
-
-    #target_pose.orientation.x = q[0]
-    #target_pose.orientation.y = q[1]
-    #target_pose.orientation.z = q[2]
-    #target_pose.orientation.w = q[3]
     arm_current_rpy = arm.get_current_rpy() 
     print("arm_current_rpy  :  ", end="")
     print(arm_current_rpy)
 
     target = [
-            arm_current_pose.position.x + 0.00,
-            arm_current_pose.position.y + 0.00, 
-           arm_current_pose.position.z + 0.001,
+            arm_current_pose.pose.position.x,
+            arm_current_pose.pose.position.y, 
+           arm_current_pose.pose.position.z,
             arm_current_rpy[0],
             arm_current_rpy[1],
             arm_current_rpy[2] ]
     print("target  :  ", end="")
     print(target)
 
-    #rospy.loginfo(target)
     arm.set_pose_target( target )
     arm.go()
-
-    #test += 0.01
 
     print("============================================================")
 
