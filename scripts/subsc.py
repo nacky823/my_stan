@@ -58,11 +58,8 @@ def main():
     #rospy.sleep(0.1)
     rospy.spin()
 
-test = 0.3
 
 def callback(msg):
-
-    global test
 
     X_GAIN = 0.0001
     Y_GAIN = 0.0001
@@ -81,6 +78,8 @@ def callback(msg):
 
     arm = moveit_commander.MoveGroupCommander("arm")
     arm_current_pose = arm.get_current_pose().pose
+    print("arm_current_pose  :  ", end="")
+    print(arm_current_pose.position.x, " , ",  arm_current_pose.position.y, " , " , arm_current_pose.position.z)
     #arm_current_pose.position.x = arm_current_pose.position.x + fix_x
     #arm_current_pose.position.y = arm_current_pose.position.y + fix_y
     #arm_current_pose.position.z = arm_current_pose.position.z + fix_z
@@ -90,9 +89,11 @@ def callback(msg):
     arm_current_rpy = arm.get_current_rpy() 
 
     target_pose = Pose()
-    target_pose.position.x = arm_current_pose.position.x
-    target_pose.position.y = arm_current_pose.position.y
-    target_pose.position.z = arm_current_pose.position.z
+    target_pose.position.x = arm_current_pose.position.x + 0.00
+    target_pose.position.y = arm_current_pose.position.y + 0.001
+    target_pose.position.z = arm_current_pose.position.z + 0.00
+    print("target_pose       :  ", end="")
+    print(target_pose.position.x, " , ", target_pose.position.y, " , " ,target_pose.position.z)
     #target_pose.position.x = 0.0
     #target_pose.position.y = 0.0
     #target_pose.position.z = test
