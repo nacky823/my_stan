@@ -34,9 +34,9 @@ def main():
 
     new_rpy = get_rpy
     new_arr = [
-            get_xyz.position.x + 0.1,
+            get_xyz.position.x + 0,
             get_xyz.position.y + 0,
-            get_xyz.position.z + 0,
+            get_xyz.position.z + 0.1,
             get_rpy[0],
             get_rpy[1],
             get_rpy[2] ]
@@ -68,12 +68,12 @@ def callback(msg):
     sub_diff = msg
     rospy.loginfo(sub_diff)
 
-    fix_x = sub_diff.x * X_GAIN
-    rospy.loginfo("recieved %f", float(fix_x))
-    fix_y = sub_diff.y * Y_GAIN
-    rospy.loginfo("recieved %f", float(fix_y))
-    fix_z = sub_diff.z * Z_GAIN
+    fix_x = sub_diff.z * Z_GAIN
+    fix_y = sub_diff.x * X_GAIN
+    fix_z = sub_diff.y * Y_GAIN
     rospy.loginfo("recieved %f", float(fix_z))
+    rospy.loginfo("recieved %f", float(fix_x))
+    rospy.loginfo("recieved %f", float(fix_y))
     rospy.loginfo("EEEE==================================================================")
 
     arm = moveit_commander.MoveGroupCommander("arm")
