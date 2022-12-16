@@ -52,8 +52,6 @@ def main():
     get_xyz = arm.get_current_pose()
     print(get_xyz)
     print("uiuiuuuuiui")
-    
-
 
     rospy.Subscriber("mediapipe_difference", Point, callback)
 
@@ -62,9 +60,9 @@ def main():
 
 def callback(msg):
 
-    X_GAIN = 0.1
-    Y_GAIN = 0.1
-    Z_GAIN = 0.1
+    X_GAIN = 0.001
+    Y_GAIN = 0.001
+    Z_GAIN = 0.001
 
     rospy.loginfo(msg)
     sub_diff = Point()
@@ -84,8 +82,24 @@ def callback(msg):
     arm_current_pose.position.x = arm_current_pose.position.x + fix_x
     arm_current_pose.position.y = arm_current_pose.position.y + fix_y
     arm_current_pose.position.z = arm_current_pose.position.z + fix_z
-    arm.set_pose_target( arm_current_pose ) # 目標ポーズ設定
+    #arm.set_pose_target( arm_current_pose ) # 目標ポーズ設定
+    #arm.go()
+
+    arm_current_rpy = arm.get_current_rpy() 
+    
+    target = [
+            arm_current_pose.position.x,
+            arm_current_pose.position.y,
+            arm_current_pose.position.z,
+            arm_current_rpy[0],
+            arm_current_rpy[1],
+            arm_current_rpy[2] ]
+
+    rospy.loginfo(target)
+    arm.set_pose_target( target )
     arm.go()
+
+
 
 
 
