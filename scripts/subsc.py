@@ -90,8 +90,8 @@ def callback(msg):
 
     target_pose = Pose()
     target_pose.position.x = arm_current_pose.position.x + 0.00
-    target_pose.position.y = arm_current_pose.position.y + 0.001
-    target_pose.position.z = arm_current_pose.position.z + 0.00
+    target_pose.position.y = arm_current_pose.position.y + 0.00
+    target_pose.position.z = arm_current_pose.position.z + 0.001
     print("target_pose       :  ", end="")
     print(target_pose.position.x, " , ", target_pose.position.y, " , " ,target_pose.position.z)
     #target_pose.position.x = 0.0
