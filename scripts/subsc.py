@@ -71,10 +71,7 @@ def callback(msg):
     fix_x = sub_diff.z * Z_GAIN
     fix_y = sub_diff.x * X_GAIN
     fix_z = sub_diff.y * Y_GAIN
-    rospy.loginfo("recieved %f", float(fix_z))
-    rospy.loginfo("recieved %f", float(fix_x))
-    rospy.loginfo("recieved %f", float(fix_y))
-    rospy.loginfo("EEEE==================================================================")
+    rospy.loginfo("MMMM~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
 
     arm = moveit_commander.MoveGroupCommander("arm")
     arm_current_pose = arm.get_current_pose().pose  # arm の現在姿勢$
@@ -97,6 +94,7 @@ def callback(msg):
     rospy.loginfo(target)
     arm.set_pose_target( target )
     arm.go()
+    rospy.loginfo("EEEE==================================================================")
 
 
 if __name__ == "__main__":
