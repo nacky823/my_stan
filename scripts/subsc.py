@@ -68,7 +68,6 @@ def callback(msg):
     Y_GAIN = 0.0001
     Z_GAIN = 0.0001
 
-    print("111111111111111111111111111111111111111111111111111111111111")
     print("publish  :  ", end="")
     print(msg.x, msg.y, msg.z)
     sub_diff = Point()
@@ -79,7 +78,6 @@ def callback(msg):
     fix_x = sub_diff.z * Z_GAIN
     fix_y = sub_diff.x * X_GAIN
     fix_z = sub_diff.y * Y_GAIN
-    print("222222222222222222222222222222222222222222222222222222222222")
 
     arm = moveit_commander.MoveGroupCommander("arm")
     arm_current_pose = arm.get_current_pose().pose
@@ -127,7 +125,7 @@ def callback(msg):
 
     #test += 0.01
 
-    print("333333333333333333333333333333333333333333333333333333333333")
+    print("============================================================")
 
 
 if __name__ == "__main__":
