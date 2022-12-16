@@ -1,4 +1,4 @@
 <launch>
-    <node name="pub_mp" pkg="my_stan" type="pub_mp.py" output="screen" />
-    <node name="sub_mp" pkg="my_stan" type="sub_mp.py" output="screen" />
+    <node name="publish_mediapipe.py" pkg="my_stan" type="mediapipe_difference" output="screen" />
+    <node name="subsc.py" pkg="my_stan" type="mediapipe_difference" output="screen" />
 </launch>
