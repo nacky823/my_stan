@@ -16,7 +16,7 @@ def main():
     print("Robot current state:")
     print(crane.get_current_state())                   # crane view current_state
     arm = moveit_commander.MoveGroupCommander("arm")   # arm instantiation
-    arm.set_max_velocity_scaling_factor(0.1)           # arm setting_max_velocity
+    arm.set_max_velocity_scaling_factor(0.7)           # arm setting_max_velocity
     arm.set_max_acceleration_scaling_factor(1.0)       # arm setting_max_acceleration
     gripper = moveit_commander.MoveGroupCommander("gripper")    # gripper instantiation
 
@@ -83,9 +83,9 @@ def callback(msg):
     print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
     #print(arm_current_pose)
 
-    arm_current_pose.pose.position.x = arm_current_pose.pose.position.x + 0.00
-    arm_current_pose.pose.position.y = arm_current_pose.pose.position.y + fix_y
-    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z + 0.0 #0.05
+    arm_current_pose.pose.position.x = arm_current_pose.pose.position.x - fix_x
+    arm_current_pose.pose.position.y = arm_current_pose.pose.position.y - fix_y
+    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z - fix_z #0.05
     print("arm_current_pose  :  ", end="")
     print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
 
