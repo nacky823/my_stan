@@ -84,8 +84,8 @@ def callback(msg):
     #print(arm_current_pose)
 
     arm_current_pose.pose.position.x = arm_current_pose.pose.position.x + 0.00
-    arm_current_pose.pose.position.y = arm_current_pose.pose.position.y + 0.00
-    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z + 0.001
+    arm_current_pose.pose.position.y = arm_current_pose.pose.position.y + 0.05
+    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z + 0.00 #0.05
     print("arm_current_pose  :  ", end="")
     print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
 
