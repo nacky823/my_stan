@@ -68,19 +68,21 @@ def callback(msg):
     Y_GAIN = 0.0001
     Z_GAIN = 0.0001
 
-    rospy.loginfo("SSSS==================================================================")
-    rospy.loginfo(msg)
+    print("111111111111111111111111111111111111111111111111111111111111")
+    print("publish  :  ", end="")
+    print(msg.x, msg.y, msg.z)
     sub_diff = Point()
     sub_diff = msg
-    rospy.loginfo(sub_diff)
+    print("sub_diff :  ", end="")
+    print(sub_diff.x, sub_diff.y, sub_diff.z)
 
     fix_x = sub_diff.z * Z_GAIN
     fix_y = sub_diff.x * X_GAIN
     fix_z = sub_diff.y * Y_GAIN
-    rospy.loginfo("MMMM~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~")
+    print("222222222222222222222222222222222222222222222222222222222222")
 
     arm = moveit_commander.MoveGroupCommander("arm")
-    arm_current_pose = arm.get_current_pose().pose  # arm の現在姿勢$
+    arm_current_pose = arm.get_current_pose().pose
     #arm_current_pose.position.x = arm_current_pose.position.x + fix_x
     #arm_current_pose.position.y = arm_current_pose.position.y + fix_y
     #arm_current_pose.position.z = arm_current_pose.position.z + fix_z
@@ -92,19 +94,19 @@ def callback(msg):
     target_pose = Pose()
     target_pose.position.x = arm_current_pose.position.x
     target_pose.position.y = arm_current_pose.position.y
-    target_pose.position.z = arm_current_pose.position.z - 0.001
+    target_pose.position.z = arm_current_pose.position.z
     #target_pose.position.x = 0.0
     #target_pose.position.y = 0.0
     #target_pose.position.z = test
 
-    q = quaternion_from_euler(0.0,0.0,0.0)
+    #q = quaternion_from_euler(0.0,0.0,0.0)
 
     target_pose.orientation.x = arm_current_pose.orientation.x
     target_pose.orientation.y = arm_current_pose.orientation.y
     target_pose.orientation.z = arm_current_pose.orientation.z
     target_pose.orientation.w = arm_current_pose.orientation.w
     
-    print(arm_current_pose.position.z)
+    #print(arm_current_pose.position.z)
 
     #target_pose.orientation.x = q[0]
     #target_pose.orientation.y = q[1]
@@ -119,13 +121,13 @@ def callback(msg):
             arm_current_rpy[1],
             arm_current_rpy[2] ]
 
-    rospy.loginfo(target)
+    #rospy.loginfo(target)
     arm.set_pose_target( target_pose )
     arm.go()
 
-    test += 0.01
+    #test += 0.01
 
-    rospy.loginfo("EEEE==================================================================")
+    print("333333333333333333333333333333333333333333333333333333333333")
 
 
 if __name__ == "__main__":
