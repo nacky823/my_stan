@@ -5,6 +5,7 @@ import rospy
 import moveit_commander
 import actionlib
 import tf
+from tf import transformations
 from gazebo_msgs.msg import ModelStates
 from geometry_msgs.msg import Point, Pose
 from control_msgs.msg import GripperCommandAction, GripperCommandGoal
@@ -24,6 +25,11 @@ def cb(msg):
     global gazebo_model_states
     gazebo_model_states = msg
     print(gazebo_model_states)
+
+def soiya(msg):
+    global tf_q
+    tf_q = msg
+    print(tf_q)
 
 def main():
     global mediapipe_coordinate
@@ -51,10 +57,11 @@ def main():
     tf_listener = tf.TransformListener()
     print(tf_listener)
 
-    sub_model_states = rospy.Subscriber("gazebo/model_states", ModelStates, cb, queue_size=1)
+    #sub_model_states = rospy.Subscriber("gazebo/model_states", ModelStates, cb, queue_size=1)
 
     #tf_a = tf_listener.lookupTransform('/base_link',name,rospy.Time(0))
     print(gazebo_model_states)
+    rospy.Subscriber("/tf", Pose, soiya, queue_size=1)
 
     if OBJECT_NAME in gazebo_model_states.name:
             object_index = gazebo_model_states.name.index(OBJECT_NAME)
@@ -64,7 +71,7 @@ def main():
 
 
 
-    rospy.Subscriber("mediapipe/mouth_coordinate", Point, callback, queue_size=10)
+    #rospy.Subscriber("mediapipe/mouth_coordinate", Point, callback, queue_size=10)
 
     #rospy.spin()
 
