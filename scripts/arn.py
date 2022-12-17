@@ -37,8 +37,8 @@ def main():
     global food
     global mouth
 
-    OPEN_RADIAN = 1.2
-    GRIP_RADIAN = 0.5
+    OPEN_RADIAN = 0.2
+    GRIP_RADIAN = 0.1
 
     rospy.init_node("arn")
     arm = moveit_commander.MoveGroupCommander("arm")
@@ -47,7 +47,7 @@ def main():
     gripper = actionlib.SimpleActionClient("crane_x7/gripper_controller/gripper_cmd", GripperCommandAction)
     gripper.wait_for_server()
     gripper_goal = GripperCommandGoal()
-    gripper_goal.command.max_effort = 4.0
+    gripper_goal.command.max_effort = 5.0 # torque
     print("=== finish init ===")
 
     print(" setting home ")
