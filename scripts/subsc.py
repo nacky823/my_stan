@@ -1,4 +1,9 @@
 #!/usr/bin/env python3
+# coding: utf-8
+# subsc.py
+
+# SPDX-FileCopyrightText: 2022 nacky823 | YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
+# SPDX-License-Identifier: MIT License
 
 import rospy
 import moveit_commander

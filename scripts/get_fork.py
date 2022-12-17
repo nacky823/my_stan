@@ -2,8 +2,8 @@
 # coding: utf-8
 # get_fork.py
 
-# SPDX-FileCopyrightText: 2022 YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
-# SPDX-License-Identifier: 
+# SPDX-FileCopyrightText: 2022 nacky823 | YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
+# SPDX-License-Identifier: MIT License
 
 # グリッパーを開く
 # キーが入力されるまで開いたまま
