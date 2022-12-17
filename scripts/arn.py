@@ -39,6 +39,8 @@ def main():
 
     OPEN_RADIAN = 0.2
     GRIP_RADIAN = 0.1
+    SEARCH_POSE = [ 0.23907234769857613, -0.002097075232802146, 0.31566854613745765,
+            -0.6305574889386819, 0.6358549451438162, -0.31570555911429393, 0.313712833374456 ]
 
     rospy.init_node("arn")
     arm = moveit_commander.MoveGroupCommander("arm")
@@ -67,8 +69,14 @@ def main():
     gripper_goal.command.position = GRIP_RADIAN
     gripper.send_goal(gripper_goal)
     gripper.wait_for_result(rospy.Duration(1.0))
+    rospy.sleep(3.0)
     print("=== finish ===")
 
+    print(" setting SEARCH_POSE ")
+    arm.set_pose_target(SEARCH_POSE)
+    arm.go()
+    rospy.sleep(3.0)
+    print("=== finish ===")
 
 
 
