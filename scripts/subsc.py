@@ -4,10 +4,9 @@ import rospy
 import moveit_commander
 from geometry_msgs.msg import Point,Pose
 from tf.transformations import quaternion_from_euler
-
+import math
 
 def main():
-
     rospy.init_node("subscribe")                       # node to start
     crane = moveit_commander.RobotCommander()          # crane instantiation
     print("")
@@ -20,13 +19,41 @@ def main():
     arm.set_max_acceleration_scaling_factor(1.0)       # arm setting_max_acceleration
     gripper = moveit_commander.MoveGroupCommander("gripper")    # gripper instantiation
 
+    # "vertical" に一旦戻す
+    arm.set_named_target("vertical")
+    arm.go()
+
     arm_init_pose = arm.get_current_pose().pose        # arm view initial_pose
+    """ Default
+    home_pose = [
+            0.165929,
+            0.000055,
+            0.272437,
+            0.236961,
+            1.361300,
+            0.218571
+            ]
+    """
+    home_pose = [
+            - 0.165929,
+            0.000055,
+            0.272437,
+            math.pi / 2,
+            0,
+            - math.pi / 2
+            ]
     print("")
     print("Arm initial pose:")
     print(arm_init_pose)
-    print("home")
-    arm.set_named_target("home")
+    print("search_pose_values")
+    arm.set_pose_target(home_pose)
     arm.go()                                           # arm moving to "home"
+    """
+    _current_joint_values = arm.get_current_joint_values()
+    _current_joint_values[-1] = math.pi / 2
+    arm.set_joint_value_target(_current_joint_values)
+    arm.go()
+    """
 
     get_rpy = arm.get_current_rpy()                    # arm getting to [ roll, pitch, yaw ]
     print(get_rpy)
@@ -85,11 +112,12 @@ def callback(msg):
     #print(arm_current_pose)
 
     # 次の位置姿勢を計算
-    arm_target_pose.pose.position.x = arm_current_pose.pose.position.x - fix_x
-    arm_target_pose.pose.position.y = arm_current_pose.pose.position.y - fix_y
-    arm_target_pose.pose.position.z = arm_current_pose.pose.position.z - fix_z #0.05
+    arm_target_pose = Pose()
+    arm_target_pose.position.x = arm_current_pose.pose.position.x - fix_x
+    arm_target_pose.position.y = arm_current_pose.pose.position.y - fix_y
+    arm_target_pose.position.z = arm_current_pose.pose.position.z - fix_z #0.05
     print("arm_target_pose  :  ", end="")
-    print(arm_target_pose.pose.position.x, " , ",  arm_target_pose.pose.position.y, " , " , arm_target_pose.pose.position.z)
+    print(arm_target_pose.position.x, " , ",  arm_target_pose.position.y, " , " , arm_target_pose.position.z)
 
     # 現在のエンドエフェクタの姿勢をロールピッチヨー角で取得する
     arm_current_rpy = arm.get_current_rpy() 
@@ -99,9 +127,9 @@ def callback(msg):
     # この値に go する
     target = [
             # 位置は更新
-            arm_target_pose.pose.position.x,
-            arm_target_pose.pose.position.y,
-            arm_target_pose.pose.position.z,
+            arm_target_pose.position.x,
+            arm_target_pose.position.y,
+            arm_target_pose.position.z,
             # 姿勢はそのまま
             arm_current_rpy[0],
             arm_current_rpy[1],

@@ -1,6 +1,10 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
+# RealSense のカラーカメラは 6 ?
+DEVICE_NUM = 6
+# めちゃくちゃキモいけどここにないと面倒くさいからここに記述
+
 import copy
 import argparse
 import rospy
@@ -17,10 +21,7 @@ target_point = Point()  # カメラ画像中心の座標
 target_point.z = 0      # camera target z
 
 # カメラの中心点からどのくらい下にずれているべきか
-OFFSET = 90
-
-# RealSense のカラーカメラは 6 ?
-DEVICE_NUM = 0
+OFFSET = - 200
 
 # FPS の表示
 FPS_DEBUG = False
@@ -344,7 +345,7 @@ def draw_landmarks(image, landmarks):
         current_point = Point() # 口中心の座標
         current_point.x = target[0]
         current_point.y = target[1]
-        current_point.z = face_depth # 深さ情報の追加 Yazawa
+        current_point.z = face_depth * 1000 # 深さ情報の追加単位は [mm] Yazawa
 
         # これ無いとだめじゃね？    Yazawa
         global diff_point
