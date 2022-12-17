@@ -150,8 +150,8 @@ def main():
 
     #rate = rospy.Rate(10)
 
-    while not rospy.is_shutdown():
-    # while True:
+    # while not rospy.is_shutdown():
+    while True:
         #print(cvFpsCalc.get()) #whileないだけのようだ。↓　
         if FPS_DEBUG:
             display_fps = cvFpsCalc.get()
@@ -200,7 +200,6 @@ def main():
             cv.putText(debug_image, "FPS:" + str(display_fps), (10, 30),
                        cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv.LINE_AA)
 
-
         # キー処理(ESC：終了) #################################################
         key = cv.waitKey(1)
         if key == 27:  # ESC
@@ -209,8 +208,6 @@ def main():
         # 画面反映 #############################################################
         cv.imshow('MediaPipe Face Mesh Demo', debug_image)
 
-
-
         # 1 秒ごとにトピックを送信
         #rate = rospy.Rate(1)
         #while not rospy.is_shutdown():
@@ -218,6 +215,7 @@ def main():
         # トピックを送信
         #msg_str = "Publishing {}".format(rospy.get_time())
         #pub_str.publish(msg_str)
+
         # これ無いとだめじゃね？        yazawa
         global diff_point
         pub_diff.publish(diff_point)
@@ -350,6 +348,9 @@ def draw_landmarks(image, landmarks):
 
         # これ無いとだめじゃね？    Yazawa
         global diff_point
+        print("current_point : ", end = "")
+        print(current_point)
+        diff_point.x = ( target_point.x - current_point.x )
         diff_point.y = ( target_point.y - current_point.y )
         diff_point.z = ( target_point.z - current_point.z )
 

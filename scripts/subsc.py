@@ -78,25 +78,31 @@ def callback(msg):
 
     arm = moveit_commander.MoveGroupCommander("arm")            # arm instantiation
     gripper = moveit_commander.MoveGroupCommander("gripper")    # gripper instantiation
+    # 現在の位置姿勢を取得
     arm_current_pose = arm.get_current_pose()
     print("arm_current_pose  :  ", end="")
     print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
     #print(arm_current_pose)
 
-    arm_current_pose.pose.position.x = arm_current_pose.pose.position.x - fix_x
-    arm_current_pose.pose.position.y = arm_current_pose.pose.position.y - fix_y
-    arm_current_pose.pose.position.z = arm_current_pose.pose.position.z - fix_z #0.05
-    print("arm_current_pose  :  ", end="")
-    print(arm_current_pose.pose.position.x, " , ",  arm_current_pose.pose.position.y, " , " , arm_current_pose.pose.position.z)
+    # 次の位置姿勢を計算
+    arm_target_pose.pose.position.x = arm_current_pose.pose.position.x - fix_x
+    arm_target_pose.pose.position.y = arm_current_pose.pose.position.y - fix_y
+    arm_target_pose.pose.position.z = arm_current_pose.pose.position.z - fix_z #0.05
+    print("arm_target_pose  :  ", end="")
+    print(arm_target_pose.pose.position.x, " , ",  arm_target_pose.pose.position.y, " , " , arm_target_pose.pose.position.z)
 
+    # 現在のエンドエフェクタの姿勢をロールピッチヨー角で取得する
     arm_current_rpy = arm.get_current_rpy() 
     print("arm_current_rpy  :  ", end="")
     print(arm_current_rpy)
 
+    # この値に go する
     target = [
-            arm_current_pose.pose.position.x,
-            arm_current_pose.pose.position.y, 
-           arm_current_pose.pose.position.z,
+            # 位置は更新
+            arm_target_pose.pose.position.x,
+            arm_target_pose.pose.position.y,
+            arm_target_pose.pose.position.z,
+            # 姿勢はそのまま
             arm_current_rpy[0],
             arm_current_rpy[1],
             arm_current_rpy[2] ]
