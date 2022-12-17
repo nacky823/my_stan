@@ -16,7 +16,16 @@ diff_point = Point() # 偏差
 target_point = Point()  # カメラ画像中心の座標
 target_point.z = 0      # camera target z
 
+# カメラの中心点からどのくらい下にずれているべきか
+OFFSET = 90
+
+# RealSense のカラーカメラは 6 ?
 DEVICE_NUM = 0
+
+# FPS の表示
+FPS_DEBUG = False
+# Rect の使用 # これマジで意味がわからん本当にいらないと思うんだけど
+RECT_DEBUG = False
 
 # 複数の座標の重心を取得するインデックス    Yazawa
 # 0 と 1 を取得するので z 座標が含まれていても問題なし
@@ -75,6 +84,7 @@ def get_args():
 
 
 def main():
+    global RECT_DEBUG, FPS_DEBUG, OFFSET
 
     rospy.init_node("publish_mediapipe")   # node 初期化
     #pub_str = rospy.Publisher("mediapipe_string", String, queue_size=10)    # publisher 作成
@@ -98,7 +108,8 @@ def main():
     #print('min_tracking_confidence = ', end='')
     #print(min_tracking_confidence)
 
-    use_brect = args.use_brect
+    if RECT_DEBUG:
+        use_brect = args.use_brect 
 
     # カメラ準備 ###############################################################
     cap = cv.VideoCapture(cap_device)
@@ -117,7 +128,7 @@ def main():
     # cap.set() は実質反映されていない。
     
     target_point.x = (x_max/2)
-    target_point.y = (y_max/2)
+    target_point.y = (y_max/2) - OFFSET
 
     # モデルロード #############################################################
     mp_face_mesh = mp.solutions.face_mesh
@@ -128,7 +139,8 @@ def main():
     )
 
     # FPS計測モジュール ########################################################
-    cvFpsCalc = CvFpsCalc(buffer_len=10) # 10.31 ここまで終わった
+    if FPS_DEBUG:
+        cvFpsCalc = CvFpsCalc(buffer_len=10) # 10.31 ここまで終わった
     #print(cvFpsCalc.get())
     #print(cvFpsCalc.get())
 
@@ -141,7 +153,8 @@ def main():
     while not rospy.is_shutdown():
     # while True:
         #print(cvFpsCalc.get()) #whileないだけのようだ。↓　
-        display_fps = cvFpsCalc.get()
+        if FPS_DEBUG:
+            display_fps = cvFpsCalc.get()
         #print(display_fps)
         #print(cvFpsCalc.get()) #この文を加えるたび、fpsが + display_fps される。
         #print(cvFpsCalc.get())
@@ -171,13 +184,21 @@ def main():
         if results.multi_face_landmarks is not None:
             for face_landmarks in results.multi_face_landmarks:
                 # 外接矩形の計算
-                brect = calc_bounding_rect(debug_image, face_landmarks)
+                if RECT_DEBUG:
+                    brect = calc_bounding_rect(debug_image, face_landmarks)
                 # 描画
                 debug_image = draw_landmarks(debug_image, face_landmarks)
-                debug_image = draw_bounding_rect(use_brect, debug_image, brect)
+                if RECT_DEBUG:
+                    debug_image = draw_bounding_rect(use_brect, debug_image, brect)
 
-        cv.putText(debug_image, "FPS:" + str(display_fps), (10, 30),
-                   cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv.LINE_AA)
+        aim_sight = np.array([int(target_point.x), int(target_point.y)])
+        print("aim_sight = ", end = "")
+        print(aim_sight)
+        cv.circle(image, aim_sight, 2, (255, 255, 0), 2)
+
+        if FPS_DEBUG:
+            cv.putText(debug_image, "FPS:" + str(display_fps), (10, 30),
+                       cv.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv.LINE_AA)
 
 
         # キー処理(ESC：終了) #################################################
@@ -258,119 +279,44 @@ def draw_landmarks(image, landmarks):
         #print(landmark_point)
         #print('/////////////////////////////////////////////////////////////////////////??')
 
-        cv.circle(image, (landmark_x, landmark_y), 2, (0, 0, 255), 1) # 点の正体
-
-        cv.circle(image, (landmark_x, landmark_y), 1, (0, 255, 0), 1)
-
     if len(landmark_point) > 0:
-        # 参考：https://github.com/tensorflow/tfjs-models/blob/master/facemesh/mesh_map.jpg
+        # 必要な時に True する
+        if False:
+            # 口 (308：右端、78：左端)
 
-        # 左眉毛(55：内側、46：外側)
-        cv.line(image, landmark_point[55], landmark_point[65], (0, 255, 0), 2)
-        cv.line(image, landmark_point[65], landmark_point[52], (0, 255, 0), 2)
-        cv.line(image, landmark_point[52], landmark_point[53], (0, 255, 0), 2)
-        cv.line(image, landmark_point[53], landmark_point[46], (0, 255, 0), 2)
+            # 右上（見る側にとって）
+            cv.line(image, landmark_point[308], landmark_point[415], (0, 255, 0), 2)
+            cv.line(image, landmark_point[415], landmark_point[310], (0, 255, 0), 2)
+            cv.line(image, landmark_point[310], landmark_point[311], (0, 255, 0), 2)
+            cv.line(image, landmark_point[311], landmark_point[312], (0, 255, 0), 2)
+            cv.line(image, landmark_point[312], landmark_point[13], (0, 255, 0), 2)
+            #cv.circle(image, landmark_point[13], 3, (255, 0, 0), 2)
+            #print('landmark_point[13] = ', end='')
+            #print(landmark_point[13])
 
-        # 右眉毛(285：内側、276：外側)
-        cv.line(image, landmark_point[285], landmark_point[295], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[295], landmark_point[282], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[282], landmark_point[283], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[283], landmark_point[276], (0, 255, 0),
-                2)
+            # 右下
+            cv.line(image, landmark_point[14], landmark_point[317], (0, 255, 0), 2)
+            cv.line(image, landmark_point[317], landmark_point[402], (0, 255, 0), 2)
+            cv.line(image, landmark_point[402], landmark_point[318], (0, 255, 0), 2)
+            cv.line(image, landmark_point[318], landmark_point[324], (0, 255, 0), 2)
+            cv.line(image, landmark_point[324], landmark_point[308], (0, 255, 0), 2)
 
-        # 左目 (133：目頭、246：目尻)
-        cv.line(image, landmark_point[133], landmark_point[173], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[173], landmark_point[157], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[157], landmark_point[158], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[158], landmark_point[159], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[159], landmark_point[160], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[160], landmark_point[161], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[161], landmark_point[246], (0, 255, 0),
-                2)
+            # 左上
+            cv.line(image, landmark_point[13], landmark_point[82], (0, 255, 0), 2)
+            cv.line(image, landmark_point[82], landmark_point[81], (0, 255, 0), 2)
+            cv.line(image, landmark_point[81], landmark_point[80], (0, 255, 0), 2)
+            cv.line(image, landmark_point[80], landmark_point[191], (0, 255, 0), 2)
+            cv.line(image, landmark_point[191], landmark_point[78], (0, 255, 0), 2)
 
-        cv.line(image, landmark_point[246], landmark_point[163], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[163], landmark_point[144], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[144], landmark_point[145], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[145], landmark_point[153], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[153], landmark_point[154], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[154], landmark_point[155], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[155], landmark_point[133], (0, 255, 0),
-                2)
-
-        # 右目 (362：目頭、466：目尻)
-        cv.line(image, landmark_point[362], landmark_point[398], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[398], landmark_point[384], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[384], landmark_point[385], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[385], landmark_point[386], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[386], landmark_point[387], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[387], landmark_point[388], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[388], landmark_point[466], (0, 255, 0),
-                2)
-
-        cv.line(image, landmark_point[466], landmark_point[390], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[390], landmark_point[373], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[373], landmark_point[374], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[374], landmark_point[380], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[380], landmark_point[381], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[381], landmark_point[382], (0, 255, 0),
-                2)
-        cv.line(image, landmark_point[382], landmark_point[362], (0, 255, 0),
-                2)
-
-        # 口 (308：右端、78：左端)
-
-        # 右上（見る側にとって）
-        cv.line(image, landmark_point[308], landmark_point[415], (0, 255, 0), 2)
-        cv.line(image, landmark_point[415], landmark_point[310], (0, 255, 0), 2)
-        cv.line(image, landmark_point[310], landmark_point[311], (0, 255, 0), 2)
-        cv.line(image, landmark_point[311], landmark_point[312], (0, 255, 0), 2)
-        cv.line(image, landmark_point[312], landmark_point[13], (0, 255, 0), 2)
-        #cv.circle(image, landmark_point[13], 3, (255, 0, 0), 2)
-        #print('landmark_point[13] = ', end='')
-        #print(landmark_point[13])
-
-        # 左上
-        cv.line(image, landmark_point[13], landmark_point[82], (0, 255, 0), 2)
-        cv.line(image, landmark_point[82], landmark_point[81], (0, 255, 0), 2)
-        cv.line(image, landmark_point[81], landmark_point[80], (0, 255, 0), 2)
-        cv.line(image, landmark_point[80], landmark_point[191], (0, 255, 0), 2)
-        cv.line(image, landmark_point[191], landmark_point[78], (0, 255, 0), 2)
-
-        # 左下
-        cv.line(image, landmark_point[78], landmark_point[95], (0, 255, 0), 2)
-        cv.line(image, landmark_point[95], landmark_point[88], (0, 255, 0), 2)
-        cv.line(image, landmark_point[88], landmark_point[178], (0, 255, 0), 2)
-        cv.line(image, landmark_point[178], landmark_point[87], (0, 255, 0), 2)
-        cv.line(image, landmark_point[87], landmark_point[14], (0, 255, 0), 2)
-        #cv.circle(image, landmark_point[14], 3, (0, 0, 255), 2)
-        #print('landmark_point[14] = ', end='')
-        #print(landmark_point[14])
+            # 左下
+            cv.line(image, landmark_point[78], landmark_point[95], (0, 255, 0), 2)
+            cv.line(image, landmark_point[95], landmark_point[88], (0, 255, 0), 2)
+            cv.line(image, landmark_point[88], landmark_point[178], (0, 255, 0), 2)
+            cv.line(image, landmark_point[178], landmark_point[87], (0, 255, 0), 2)
+            cv.line(image, landmark_point[87], landmark_point[14], (0, 255, 0), 2)
+            #cv.circle(image, landmark_point[14], 3, (0, 0, 255), 2)
+            #print('landmark_point[14] = ', end='')
+            #print(landmark_point[14])
 
         #print('[ x, y ] : [14] - [13] = ', end='')
         diff = [ (a - b)/2.0 for (a, b) in zip(landmark_point[14], landmark_point[13]) ]
@@ -408,13 +354,6 @@ def draw_landmarks(image, landmarks):
         diff_point.z = ( target_point.z - current_point.z )
 
         cv.circle(image, target, 3, (255, 0, 255), 2) # 口中心の描写
-
-        # 右下
-        cv.line(image, landmark_point[14], landmark_point[317], (0, 255, 0), 2)
-        cv.line(image, landmark_point[317], landmark_point[402], (0, 255, 0), 2)
-        cv.line(image, landmark_point[402], landmark_point[318], (0, 255, 0), 2)
-        cv.line(image, landmark_point[318], landmark_point[324], (0, 255, 0), 2)
-        cv.line(image, landmark_point[324], landmark_point[308], (0, 255, 0), 2)
 
         #cv.putText(image, "z:" + str(round(landmark_z, 3)), (landmark_x - 10, landmark_y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
 

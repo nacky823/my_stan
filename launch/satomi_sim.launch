@@ -56,10 +56,5 @@
     <arg name="use_gui" default="$(arg use_gui)" />
   </include>
 
-  <!-- ↓ これで $ roslaunch crane_x7_bringup demo.launch fake_execution:=false を自動で立ち上げる（たぶん） -->
-  <include file="$(find crane_x7_bringup)/launch/demo.launch">
-      <arg name="fake_execution" value="false" />
-  </include>
-
 </launch>
 
