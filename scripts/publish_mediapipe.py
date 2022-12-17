@@ -146,7 +146,7 @@ def main():
     #print(cvFpsCalc.get())
 
     ret, image = cap.read()
-    print('各次元の長さ : (y, x, ?) =', image.shape)
+    # print('各次元の長さ : (y, x, ?) =', image.shape)
     print('全要素数 :', image.size)
 
     #rate = rospy.Rate(10)
@@ -179,11 +179,15 @@ def main():
         image = cv.cvtColor(image, cv.COLOR_BGR2RGB)
         results = face_mesh.process(image)
 
+        # 口の座標が取得できる場合のみ publish したい
+        mouth_exist = False
+
         # 描画 ################################################################
         #print(results.multi_face_landmarks)
         #print('/////////////////////////////////////////////////////////////////////////??')
         if results.multi_face_landmarks is not None:
             for face_landmarks in results.multi_face_landmarks:
+                mouth_exist = True
                 # 外接矩形の計算
                 if RECT_DEBUG:
                     brect = calc_bounding_rect(debug_image, face_landmarks)
@@ -192,6 +196,7 @@ def main():
                 if RECT_DEBUG:
                     debug_image = draw_bounding_rect(use_brect, debug_image, brect)
 
+        # 照準点を描画したいんだけど...
         aim_sight = np.array([int(target_point.x), int(target_point.y)])
         print("aim_sight = ", end = "")
         print(aim_sight)
@@ -219,14 +224,18 @@ def main():
 
         # これ無いとだめじゃね？        yazawa
         global diff_point
-        pub_diff.publish(diff_point)
+        if mouth_exist:
+            pub_diff.publish(diff_point)
 
-        #rospy.loginfo("Message '{}' published".format(msg_str))
-        rospy.loginfo(diff_point)
+            #rospy.loginfo("Message '{}' published".format(msg_str))
+            rospy.loginfo(diff_point)
 
-        # 1 秒スリープする
-        #rate.sleep()
-        rospy.sleep(1) # 0.05
+            # 1 秒スリープする
+            #rate.sleep()
+            rospy.sleep(1) # 0.05
+
+        else:
+            print("lost ...")
 
         rospy.sleep(0.02)
 
