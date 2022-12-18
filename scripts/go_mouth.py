@@ -14,7 +14,7 @@ import numpy as np
 import sys
 from thrust import arm_thrust_node 
 
-class go_food_node():
+class go_mouth_node():
     def __init__(self):
         # atn => Arm Thrust Node
         self.generate_subscriber()
@@ -24,8 +24,8 @@ class go_food_node():
 
     # サブスクライバを作成する
     def generate_subscriber(self):
-        print("topic name : /food_coordinate")
-        self.sub = rospy.Subscriber("/food_coordinate", Pose, self.callback)
+        print("topic name : /mediapipe_difference")
+        self.sub = rospy.Subscriber("/mediapipe_difference", Pose, self.callback)
 
     # 一回目だけ実行する
     def callback(self, target_pose):
@@ -66,7 +66,7 @@ if __name__ == "__main__":
     gmn = go_mouth_node()
 
     while not gmn.get_count() > 0:
-        gmn.tester([-0.2, 0.2, 0.3])
+        # gmn.tester([-0.2, 0.2, 0.3])
         rospy.sleep(0.1)
 
     print(gmn.get_count())

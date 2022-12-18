@@ -93,7 +93,7 @@ def main():
 
     rospy.init_node("publish_mediapipe")   # node 初期化
     #pub_str = rospy.Publisher("mediapipe_string", String, queue_size=10)    # publisher 作成
-    pub_diff = rospy.Publisher("mediapipe_difference", Point, queue_size=10)    # publisher 作成
+    pub_diff = rospy.Publisher("/mediapipe_difference", Point, queue_size=10)    # publisher 作成
 
 
     # 引数解析 #################################################################

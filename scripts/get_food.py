@@ -66,7 +66,7 @@ if __name__ == "__main__":
     gfn = get_food_node()
 
     while not gfn.get_count() > 0:
-        gfn.tester([0.2, 0.2, 0.085])
+        # gfn.tester([0.2, 0.2, 0.085])
         rospy.sleep(0.1)
 
     print(gfn.get_count())
