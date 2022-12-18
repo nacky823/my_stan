@@ -31,8 +31,6 @@ def callback_mouth(msg):
     print("mouth:")
     print(mouth)
 
-def arn(target):
-    print(target)
 
 
 def main():
@@ -80,22 +78,49 @@ def main():
     rospy.sleep(3.0)
     print("=== finish ===")
 
-
+    #get_cnt = 0
+    #while not get_cnt => 5
     rospy.Subscriber("/tf", TFMessage, selection, queue_size=1)
+        #get_cnt = selection()
+        #rospy.Subscriber("/ar_pose_marker", TFMessage, selection)
     
 
     rospy.spin()
 
-def selection(msg):
+def selection(msg, cnt):
     buff = msg
     print("msg========")
     print(msg)
     print("buff++++++++")
     print(buff)
+    #print("frame_id~~~~~~")
+    #print(buff.transforms.child_frame_id)
+    #print("buff.position.x====")
+    #print(buff.position.x)
     
 
+def arn():
 
+    target_pose = [
+            food.position.x + realsense.position.x
+            food.position.y + realsense.position.y,
+            food.position.z + realsense.position.z,
+            food.orientation.x + realsense.orientation.x,
+            food.orientation.y + realsense.orientation.y,
+            food.orientation.z + realsense.orientation.z,
+            food.orientation.w + realsense.orientation.w ]
 
+    print(" setting target_pose ")
+    arm.set_pose_target(target_pose)
+    arm.go()
+    rospy.sleep(3.0)
+    print("=== finish ===")
+
+    print(" setting home ")
+    arm.set_named_target("home")
+    arm.go()
+    rospy.sleep(1.0)
+    print("=== finish ===")
 
 
 if __name__ == '__main__':
