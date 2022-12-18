@@ -14,6 +14,36 @@ import numpy as np
 import sys
 from thrust import arm_thrust_node 
 
+def deg2rad(deg):
+    return math.radians(deg)
+
+# get_fork をそのまま持ってきた
+def get_fork():
+    # 閉まる角度を指定 1 未満にするとなぜか範囲外だと言われる
+    deg = 0.8
+    GRIPPER_CLOSE = [deg2rad(deg), deg2rad(deg)]
+    # 開く角度を指定 度数法 93 度が限界
+    deg = 15
+    GRIPPER_OPEN = [deg2rad(deg), deg2rad(deg)]
+    # ノードを初期化する
+    rospy.init_node('get_fork')
+    # gripper グループを取得する
+    gripper = moveit_commander.MoveGroupCommander("gripper")
+    # 最大関節速度を下げるらしい 0 ~ 1 で指定
+    gripper.set_max_velocity_scaling_factor(0.4)
+    # 最大関節加速度を下げるらしい 0 ~ 1 で指定
+    gripper.set_max_acceleration_scaling_factor(1.0)
+    # 目標値を設定
+    gripper.set_joint_value_target(GRIPPER_OPEN)
+    # 目標値に向けて動かす
+    gripper.go()
+    # キーが入力されるまで待つ
+    input("Input Key for Gripper Close ... ")
+    # キーが入力されたらグリッパーを閉じる
+    gripper.set_joint_value_target(GRIPPER_CLOSE)
+    # 目標値に向けて動かす
+    gripper.go()
+
 class go_mouth_node():
     def __init__(self):
         # atn => Arm Thrust Node
@@ -63,6 +93,7 @@ class go_mouth_node():
 
 if __name__ == "__main__":
     rospy.init_node("go_mouth_node")
+    get_fork()
     gmn = go_mouth_node()
 
     while not gmn.get_count() > 0:
