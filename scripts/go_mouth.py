@@ -14,12 +14,12 @@ import numpy as np
 import sys
 from thrust import arm_thrust_node 
 
-class get_food_node():
+class go_food_node():
     def __init__(self):
         # atn => Arm Thrust Node
         self.generate_subscriber()
-        self.atn = arm_thrust_node("down")
-        # self.atn = arm_thrust_node("beside")
+        self.atn = arm_thrust_node("beside")
+        # self.atn = arm_thrust_node("down")
         self.count = 0
 
     # サブスクライバを作成する
@@ -62,16 +62,16 @@ class get_food_node():
         self.callback(target_pose)
 
 if __name__ == "__main__":
-    rospy.init_node("get_food_node")
-    gfn = get_food_node()
+    rospy.init_node("go_mouth_node")
+    gmn = go_mouth_node()
 
-    while not gfn.get_count() > 0:
-        gfn.tester([0.2, 0.2, 0.085])
+    while not gmn.get_count() > 0:
+        gmn.tester([-0.2, 0.2, 0.3])
         rospy.sleep(0.1)
 
-    print(gfn.get_count())
+    print(gmn.get_count())
 
-    del gfn
+    del gmn
 
     # 終了コード
     sys.exit(0)

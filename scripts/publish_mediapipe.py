@@ -6,7 +6,7 @@
 # SPDX-License-Identifier: MIT License
 
 # RealSense のカラーカメラは 6 ?
-DEVICE_NUM = 6
+DEVICE_NUM = 0
 # めちゃくちゃキモいけどここにないと面倒くさいからここに記述
 
 import copy
@@ -151,7 +151,7 @@ def main():
 
     ret, image = cap.read()
     # print('各次元の長さ : (y, x, ?) =', image.shape)
-    print('全要素数 :', image.size)
+    # print('全要素数 :', image.size)
 
     #rate = rospy.Rate(10)
 

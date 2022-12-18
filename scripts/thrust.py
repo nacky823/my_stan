@@ -114,8 +114,6 @@ class arm_thrust_node():
             print("unknown search pose " + str(string), file=sys.strerr)
             sys.exit(1)
 
-        # ノードの開始
-        rospy.init_node("subscribe")
         # arm グループの取得
         self.arm = moveit_commander.MoveGroupCommander("arm")
         # 速度加速度の制限を設ける
@@ -180,7 +178,7 @@ class arm_thrust_node():
             # y - z を揃える
             self.aim_yz(difference_y, difference_z)
             # x 方向に突きをする
-            self.arm_liner_mover.x_updn(target)
+            self.arm_liner_mover.x_updn(difference_x)
 
         # 下向きの時
         if self.besideordown == 1:
