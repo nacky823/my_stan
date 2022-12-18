@@ -4,11 +4,13 @@
 import rospy
 import moveit_commander
 import actionlib
+import math
 import tf
 from tf import transformations
 from gazebo_msgs.msg import ModelStates
 from geometry_msgs.msg import Point, Pose
 from control_msgs.msg import GripperCommandAction, GripperCommandGoal
+from tf2_msgs.msg import TFMessage
 
 food = Pose()
 mouth = Pose()
@@ -79,24 +81,22 @@ def main():
     print("=== finish ===")
 
 
+    rospy.Subscriber("/tf", TFMessage, selection, queue_size=1)
+    
+
+    rospy.spin()
+
+def selection(msg):
+    buff = msg
+    print("msg========")
+    print(msg)
+    print("buff++++++++")
+    print(buff)
+    
 
 
 
 
-
-
-
-
-
-
-    #rospy.Subscriber("/tf", Pose, soiya, queue_size=1)
-
-
-
-
-
-
-    #rospy.spin()
 
 if __name__ == '__main__':
     try:
