@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# thrust.py
+# get_food.py
 
 # SPDX-FileCopyrightText: 2022 nacky823 | YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
-# SPDX-License-Identifier: MIT License
+# SPDX-License-Identifier:
 
 import rospy
 import moveit_commander
@@ -14,13 +14,40 @@ import numpy as np
 import sys
 from thrust import arm_thrust_node 
 
+def deg2rad(deg):
+    return math.radians(deg)
+
+def get_fork():
+    # 閉まる角度を指定 1 未満にするとなぜか範囲外だと言われる
+    deg = 0.8
+    GRIPPER_CLOSE = [deg2rad(deg), deg2rad(deg)]
+    # 開く角度を指定 度数法 93 度が限界
+    deg = 15
+    GRIPPER_OPEN = [deg2rad(deg), deg2rad(deg)]
+    # gripper グループを取得する
+    gripper = moveit_commander.MoveGroupCommander("gripper")
+    # 最大関節速度を下げるらしい 0 ~ 1 で指定
+    gripper.set_max_velocity_scaling_factor(0.4)
+    # 最大関節加速度を下げるらしい 0 ~ 1 で指定
+    gripper.set_max_acceleration_scaling_factor(1.0)
+    # 目標値を設定
+    gripper.set_joint_value_target(GRIPPER_OPEN)
+    # 目標値に向けて動かす
+    gripper.go()
+    # キーが入力されるまで待つ
+    input("Input Key for Gripper Close ... ")
+    # キーが入力されたらグリッパーを閉じる
+    gripper.set_joint_value_target(GRIPPER_CLOSE)
+    # 目標値に向けて動かす
+    gripper.go()
+
 class get_food_node():
     def __init__(self):
         # atn => Arm Thrust Node
-        self.generate_subscriber()
+        self.count = 0
         self.atn = arm_thrust_node("down")
         # self.atn = arm_thrust_node("beside")
-        self.count = 0
+        self.generate_subscriber()
 
     # サブスクライバを作成する
     def generate_subscriber(self):
@@ -33,7 +60,7 @@ class get_food_node():
             # エイムしたあとに下に突き出す
             print("callbacked")
             self.atn.main(self.pose2position(target_pose))
-        self.count += 1
+            self.count += 1
 
     # 何回コールバックしたか取得する
     def get_count(self):
@@ -63,6 +90,7 @@ class get_food_node():
 
 if __name__ == "__main__":
     rospy.init_node("get_food_node")
+    get_fork()
     gfn = get_food_node()
 
     while not gfn.get_count() > 0:

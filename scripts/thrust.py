@@ -3,19 +3,12 @@
 # thrust.py
 
 # SPDX-FileCopyrightText: 2022 nacky823 | YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
-# SPDX-License-Identifier: MIT License
+# SPDX-License-Identifier:
 
-import rospy
 import moveit_commander
 from geometry_msgs.msg import Pose
-from tf.transformations import quaternion_from_euler
 import math
-import numpy as np
 import sys
-
-# 二点間の距離を求める
-def norm(a, b):
-    return np.linalg.norm(np.subtract(a, b), ord = 2)
 
 # リストの要素同士の差を計算する
 def diff(a, b):
@@ -109,7 +102,7 @@ class arm_thrust_node():
         elif string == "down":
             self.besideordown = 1
             # 下を向くときはまずこの位置にエンドエフェクタを持っていく
-            self.default_pose = [0.25, 0, 0.25]
+            self.default_pose = [0.261683, 0, 0.305207]
         else:
             print("unknown search pose " + str(string), file=sys.strerr)
             sys.exit(1)
@@ -145,7 +138,7 @@ class arm_thrust_node():
                     self.default_pose[2],
                     - math.pi,
                     0,
-                    math.pi
+                    math.pi / 2
                     ]
         self.arm.set_pose_target(default_pose)
         self.arm.go()
@@ -190,7 +183,6 @@ class arm_thrust_node():
 
     def main(self, target):
         self.aim(target)
-        # rospy.spin()
 
 """ ライブラリとして使用するためいらない
 if __name__ == "__main__":
