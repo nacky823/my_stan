@@ -6,11 +6,8 @@
 # SPDX-License-Identifier:
 
 import rospy
-import moveit_commander
 from geometry_msgs.msg import Point,Pose
-from tf.transformations import quaternion_from_euler
 import math
-import numpy as np
 import sys
 from thrust import arm_thrust_node 
 
