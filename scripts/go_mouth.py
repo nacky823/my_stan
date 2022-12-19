@@ -1,26 +1,26 @@
 #!/usr/bin/env python3
 # coding: utf-8
-# thrust.py
+# go_mouth.py
 
 # SPDX-FileCopyrightText: 2022 nacky823 | YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
-# SPDX-License-Identifier: MIT License
+# SPDX-License-Identifier:
 
 import rospy
-import moveit_commander
-from geometry_msgs.msg import Point,Pose
-from tf.transformations import quaternion_from_euler
+from geometry_msgs.msg import Pose
 import math
-import numpy as np
 import sys
 from thrust import arm_thrust_node 
+
+def deg2rad(deg):
+    return math.radians(deg)
 
 class go_mouth_node():
     def __init__(self):
         # atn => Arm Thrust Node
-        self.generate_subscriber()
         self.atn = arm_thrust_node("beside")
         # self.atn = arm_thrust_node("down")
         self.count = 0
+        self.generate_subscriber()
 
     # サブスクライバを作成する
     def generate_subscriber(self):
@@ -33,7 +33,7 @@ class go_mouth_node():
             # エイムしたあとに下に突き出す
             print("callbacked")
             self.atn.main(self.pose2position(target_pose))
-        self.count += 1
+            self.count += 1
 
     # 何回コールバックしたか取得する
     def get_count(self):

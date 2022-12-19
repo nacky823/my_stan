@@ -19,7 +19,7 @@ def deg2rad(deg):
 
 def main():
     # 閉まる角度を指定 1 未満にするとなぜか範囲外だと言われる
-    deg = 1
+    deg = 0.8
     GRIPPER_CLOSE = [deg2rad(deg), deg2rad(deg)]
     # 開く角度を指定 度数法 93 度が限界
     deg = 15

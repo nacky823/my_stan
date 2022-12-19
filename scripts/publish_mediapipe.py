@@ -3,7 +3,7 @@
 # publish_mediapipe.py
 
 # SPDX-FileCopyrightText: 2022 nacky823 | YAZAWA Kenichi s21c1036hn@s.chibakoudai.jp
-# SPDX-License-Identifier: MIT License
+# SPDX-License-Identifier:
 
 # RealSense のカラーカメラは 6 ?
 DEVICE_NUM = 0
@@ -16,16 +16,17 @@ import cv2 as cv
 import numpy as np
 import mediapipe as mp
 import statistics
+import math
 from collections import deque
 from std_msgs.msg import String
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Pose, Point
 
 diff_point = Point() # 偏差
 target_point = Point()  # カメラ画像中心の座標
 target_point.z = 0      # camera target z
 
 # カメラの中心点からどのくらい下にずれているべきか
-OFFSET = - 200
+OFFSET = - 800
 
 # FPS の表示
 FPS_DEBUG = False
@@ -43,6 +44,24 @@ def center(points):
 # こっちは x, y の二次元で与えないとエラー出そう
 def norm(a, b):
         return np.linalg.norm(np.subtract(a, b), ord = 2)
+
+# xyzrpy to xyzxyzw
+def list2pose(_list):
+    _pose = Pose()
+    _pose.position.x = _list[0]
+    _pose.position.y = _list[1]
+    _pose.position.z = _list[2]
+    sp = math.sin(_list[3] / 2)
+    cp = math.cos(_list[3] / 2)
+    st = math.sin(_list[4] / 2)
+    ct = math.cos(_list[4] / 2)
+    sk = math.sin(_list[5] / 2)
+    ck = math.cos(_list[5] / 2)
+    _pose.orientation.w = cp * ct * ck + sp * st * sk
+    _pose.orientation.x = sp * ct * ck - cp * st * sk
+    _pose.orientation.y = cp * st * ck + sp * ct * sk
+    _pose.orientation.z = cp * ct * sk - sp * st * ck
+    return _pose
 
 class CvFpsCalc(object):
     def __init__(self, buffer_len=1):
@@ -93,7 +112,7 @@ def main():
 
     rospy.init_node("publish_mediapipe")   # node 初期化
     #pub_str = rospy.Publisher("mediapipe_string", String, queue_size=10)    # publisher 作成
-    pub_diff = rospy.Publisher("/mediapipe_difference", Point, queue_size=10)    # publisher 作成
+    pub_diff = rospy.Publisher("/mediapipe_difference", Pose, queue_size=10)    # publisher 作成
 
 
     # 引数解析 #################################################################
@@ -121,19 +140,20 @@ def main():
     print('Capture_device : ', end='')
     print(cap_device)
     cap.set(cv.CAP_PROP_FRAME_WIDTH, cap_width)
+    # 640
     print('WIDTH : x_max = ', end='')
     x_max = cap.get(cv.CAP_PROP_FRAME_WIDTH)
     print(x_max)
     #print(cap.get(cv.CAP_PROP_FRAME_WIDTH))
     cap.set(cv.CAP_PROP_FRAME_HEIGHT, cap_height)
+    # 540
     print('HEIGHT : y_max = ', end='')
     y_max = cap.get(cv.CAP_PROP_FRAME_HEIGHT)
     print(y_max)
-    #print(cap.get(cv.CAP_PROP_FRAME_HEIGHT))
-    # cap.set() は実質反映されていない。
-    
-    target_point.x = (x_max/2)
-    target_point.y = (y_max/2) - OFFSET
+
+    target_point.x = (x_max / 2)
+    target_point.y = (y_max / 2) - OFFSET
+    target_point.z = 0.27
 
     # モデルロード #############################################################
     mp_face_mesh = mp.solutions.face_mesh
@@ -145,7 +165,7 @@ def main():
 
     # FPS計測モジュール ########################################################
     if FPS_DEBUG:
-        cvFpsCalc = CvFpsCalc(buffer_len=10) # 10.31 ここまで終わった
+        cvFpsCalc = CvFpsCalc(buffer_len = 10) # 10.31 ここまで終わった
     #print(cvFpsCalc.get())
     #print(cvFpsCalc.get())
 
@@ -201,10 +221,10 @@ def main():
                     debug_image = draw_bounding_rect(use_brect, debug_image, brect)
 
         # 照準点を描画したいんだけど...
-        aim_sight = np.array([int(target_point.x), int(target_point.y)])
-        print("aim_sight = ", end = "")
-        print(aim_sight)
-        cv.circle(image, aim_sight, 2, (255, 255, 0), 2)
+        # aim_sight = np.array([int(target_point.x), int(target_point.y)])
+        # print("aim_sight = ", end = "")
+        # print(aim_sight)
+        # cv.circle(image, aim_sight, 2, (255, 255, 0), 2)
 
         if FPS_DEBUG:
             cv.putText(debug_image, "FPS:" + str(display_fps), (10, 30),
@@ -229,10 +249,12 @@ def main():
         # これ無いとだめじゃね？        yazawa
         global diff_point
         if mouth_exist:
-            pub_diff.publish(diff_point)
+            pub_list = [diff_point.x, diff_point.y, diff_point.z, math.pi / 2,0,-math.pi / 2]
+            pub_diff_pose = list2pose(pub_list)
+            pub_diff.publish(pub_diff_pose)
 
             #rospy.loginfo("Message '{}' published".format(msg_str))
-            rospy.loginfo(diff_point)
+            rospy.loginfo(pub_diff_pose)
 
             # 1 秒スリープする
             #rate.sleep()
@@ -273,7 +295,9 @@ def draw_landmarks(image, landmarks):
     image_width, image_height = image.shape[1], image.shape[0]
 
     landmark_point = []
-    landmark_pointz =[]
+    landmark_point_mouth = []
+    landmark_point_left_eye = []
+    landmark_point_right_eye = []
 
     for index, landmark in enumerate(landmarks.landmark):
         if landmark.visibility < 0 or landmark.presence < 0:
@@ -282,98 +306,59 @@ def draw_landmarks(image, landmarks):
         landmark_x = min(int(landmark.x * image_width), image_width - 1)
         landmark_y = min(int(landmark.y * image_height), image_height - 1)
         landmark_z = landmark.z
-        #print(landmark_z)
-        #print((landmark_x, landmark_y))
-        #print('/////////////////////////////////////////////////////////////////////////??')
 
-        landmark_point.append((landmark_x, landmark_y))
-        landmark_pointz.append((landmark_x, landmark_y, landmark_z))
-        #print(landmark_point)
-        #print('/////////////////////////////////////////////////////////////////////////??')
+        if 13 <= index and index < 15:
+            landmark_point_mouth.append((landmark_x, landmark_y))
+        if index == 133 or index == 246:
+            landmark_point_left_eye.append((landmark_x, landmark_y))
+        if index == 362 or index == 466:
+            landmark_point_right_eye.append((landmark_x, landmark_y))
 
-    if len(landmark_point) > 0:
-        # 必要な時に True する
-        if False:
-            # 口 (308：右端、78：左端)
+    # 口の中心点を取得
+    mouth_points = np.array([landmark_point_mouth[0], landmark_point_mouth[1]])
+    target = center(mouth_points)
 
-            # 右上（見る側にとって）
-            cv.line(image, landmark_point[308], landmark_point[415], (0, 255, 0), 2)
-            cv.line(image, landmark_point[415], landmark_point[310], (0, 255, 0), 2)
-            cv.line(image, landmark_point[310], landmark_point[311], (0, 255, 0), 2)
-            cv.line(image, landmark_point[311], landmark_point[312], (0, 255, 0), 2)
-            cv.line(image, landmark_point[312], landmark_point[13], (0, 255, 0), 2)
-            #cv.circle(image, landmark_point[13], 3, (255, 0, 0), 2)
-            #print('landmark_point[13] = ', end='')
-            #print(landmark_point[13])
+    ### 深さの計算 Yazawa ###
+    # 両目の特徴点の座標を取得
+    left_eye_points = np.array([landmark_point_left_eye[0], landmark_point_left_eye[1]])
+    right_eye_points = np.array([landmark_point_right_eye[0], landmark_point_right_eye[1]])
+    # 両目の中心点を取得
+    left_eye = center(left_eye_points)
+    # print(left_eye)
+    right_eye = center(right_eye_points)
+    # print(right_eye)
+    # 両目の距離を計算
+    px = norm(left_eye, right_eye)
+    # 三角法で距離を計算    単位 [m]
+    dist1 = 50     # px
+    diff1 = 0.94      # m
+    dist2 = 150      # px
+    diff2 = 0.27     # m
+    face_depth = (px - dist1) * (diff1 - diff2) / (dist1 - dist2) + diff1
 
-            # 右下
-            cv.line(image, landmark_point[14], landmark_point[317], (0, 255, 0), 2)
-            cv.line(image, landmark_point[317], landmark_point[402], (0, 255, 0), 2)
-            cv.line(image, landmark_point[402], landmark_point[318], (0, 255, 0), 2)
-            cv.line(image, landmark_point[318], landmark_point[324], (0, 255, 0), 2)
-            cv.line(image, landmark_point[324], landmark_point[308], (0, 255, 0), 2)
+    current_point = Point() # 口中心の座標
+    current_point.x = target[0]
+    current_point.y = target[1]
+    # とりま決め打ちで
+    current_point.z = 0.2
+    # current_point.z = face_depth # 深さ情報の追加単位は [m] Yazawa
 
-            # 左上
-            cv.line(image, landmark_point[13], landmark_point[82], (0, 255, 0), 2)
-            cv.line(image, landmark_point[82], landmark_point[81], (0, 255, 0), 2)
-            cv.line(image, landmark_point[81], landmark_point[80], (0, 255, 0), 2)
-            cv.line(image, landmark_point[80], landmark_point[191], (0, 255, 0), 2)
-            cv.line(image, landmark_point[191], landmark_point[78], (0, 255, 0), 2)
+    print("current_point : ", end = "")
+    print(current_point)
+    print("target_point : ", end = "")
+    print(target_point)
+    global diff_point
+    diff_point.y = ( target_point.x - current_point.x ) / 2000
+    diff_point.z = ( target_point.y - current_point.y ) / 2000
+    diff_point.x = ( target_point.z - current_point.z )
+    print("diff_point : ", end = "")
+    print(diff_point)
 
-            # 左下
-            cv.line(image, landmark_point[78], landmark_point[95], (0, 255, 0), 2)
-            cv.line(image, landmark_point[95], landmark_point[88], (0, 255, 0), 2)
-            cv.line(image, landmark_point[88], landmark_point[178], (0, 255, 0), 2)
-            cv.line(image, landmark_point[178], landmark_point[87], (0, 255, 0), 2)
-            cv.line(image, landmark_point[87], landmark_point[14], (0, 255, 0), 2)
-            #cv.circle(image, landmark_point[14], 3, (0, 0, 255), 2)
-            #print('landmark_point[14] = ', end='')
-            #print(landmark_point[14])
+    cv.circle(image, target, 3, (255, 0, 255), 2) # 口中心の描写
 
-        #print('[ x, y ] : [14] - [13] = ', end='')
-        diff = [ (a - b)/2.0 for (a, b) in zip(landmark_point[14], landmark_point[13]) ]
-        #print(diff)
-
-        #print('[ →  , ↓  ] : target = ', end='')
-        summ = [ a + b for (a, b) in zip(landmark_point[13], diff) ]
-        target = [ int(i) for i in summ ]   # 口中心の座標所得
-        #print(target)
-
-        ### 深さの計算 Yazawa ###
-        # 両目の特徴点の座標を取得
-        left_eye_points = np.array([landmark_point[133], landmark_point[246]])
-        right_eye_points = np.array([landmark_point[362], landmark_point[466]])
-        # 両目の中心点を取得
-        left_eye = center(left_eye_points)
-        right_eye = center(right_eye_points)
-        # 両目の距離を計算
-        px = norm(left_eye, right_eye)
-        # 三角法で距離を計算    単位 [m]
-        dist1 = 50     # px
-        diff1 = 0.94      # m
-        dist2 = 150      # px
-        diff2 = 0.27     # m
-        face_depth = (px - dist1) * (diff1 - diff2) / (dist1 - dist2) + diff1
-
-        current_point = Point() # 口中心の座標
-        current_point.x = target[0]
-        current_point.y = target[1]
-        current_point.z = face_depth * 1000 # 深さ情報の追加単位は [mm] Yazawa
-
-        # これ無いとだめじゃね？    Yazawa
-        global diff_point
-        print("current_point : ", end = "")
-        print(current_point)
-        diff_point.x = ( target_point.x - current_point.x )
-        diff_point.y = ( target_point.y - current_point.y )
-        diff_point.z = ( target_point.z - current_point.z )
-
-        cv.circle(image, target, 3, (255, 0, 255), 2) # 口中心の描写
-
-        #cv.putText(image, "z:" + str(round(landmark_z, 3)), (landmark_x - 10, landmark_y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
+    #cv.putText(image, "z:" + str(round(landmark_z, 3)), (landmark_x - 10, landmark_y - 10), cv.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 1, cv.LINE_AA)
 
     # endif len(landmark_point)
-
 
     return image
 
