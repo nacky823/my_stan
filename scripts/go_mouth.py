@@ -6,7 +6,7 @@
 # SPDX-License-Identifier:
 
 import rospy
-from geometry_msgs.msg import Point,Pose
+from geometry_msgs.msg import Pose
 import math
 import sys
 from thrust import arm_thrust_node 
