@@ -14,6 +14,7 @@ from tf2_msgs.msg import TFMessage
 
 food = Pose()
 mouth = Pose()
+cnt = 0
 
 def callback_food(msg):
     global food
@@ -36,6 +37,7 @@ def callback_mouth(msg):
 def main():
     global food
     global mouth
+    global cnt
 
     OPEN_RADIAN = 0.2
     GRIP_RADIAN = 0.1
@@ -80,35 +82,37 @@ def main():
 
     #get_cnt = 0
     #while not get_cnt => 5
-    rospy.Subscriber("/tf", TFMessage, selection, queue_size=1)
+    while cnt >= 10 :
+        rospy.Subscriber("/food_coordinaite", Pose, selection, queue_size=10)
         #get_cnt = selection()
         #rospy.Subscriber("/ar_pose_marker", TFMessage, selection)
-    
+    arn()
 
-    rospy.spin()
 
-def selection(msg, cnt):
-    buff = msg
-    print("msg========")
-    print(msg)
-    print("buff++++++++")
-    print(buff)
-    #print("frame_id~~~~~~")
-    #print(buff.transforms.child_frame_id)
-    #print("buff.position.x====")
-    #print(buff.position.x)
-    
+def selection(msg):
+    food.position.x = msg.position.x
+    food.position.y = msg.position.y
+    food.position.z = msg.position.z
+    food.orientation.x = food.orientation.x
+    food.orientation.y = food.orientation.y
+    food.orientation.z = food.orientation.z
+    food.orientation.w = food.orientation.w
+    cnt = cnt + 1
 
 def arn():
+    arm = moveit_commander.MoveGroupCommander("arm")
+    arm.set_max_velocity_scaling_factor(0.4)
+    arm.set_max_acceleration_scaling_factor(1.0)
 
-    target_pose = [
-            food.position.x + realsense.position.x
-            food.position.y + realsense.position.y,
-            food.position.z + realsense.position.z,
-            food.orientation.x + realsense.orientation.x,
-            food.orientation.y + realsense.orientation.y,
-            food.orientation.z + realsense.orientation.z,
-            food.orientation.w + realsense.orientation.w ]
+    target_pose = Pose()
+
+    target_pose.position.x = food.position.x
+    target_pose.position.y = food.position.y
+    target_pose.position.z = food.position.z
+    target_pose.orientation.x = food.orientation.x
+    target_pose.orientation.y = food.orientation.y
+    target_pose.orientation.z = food.orientation.z
+    target_pose.orientation.w = food.orientation.w
 
     print(" setting target_pose ")
     arm.set_pose_target(target_pose)
