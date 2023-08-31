@@ -34,7 +34,7 @@ class give_food_node():
         publish_pose_list = [
                 0.18,
                 0,
-                0.1,
+                0.18,
                 - math.pi,
                 0,
                 math.pi / 2
